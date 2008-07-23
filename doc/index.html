@@ -867,8 +867,8 @@ a <em>canonicalized</em> name which can be used for unambiguous
 look-ups by removing all whitespace, hyphens, and underline
 characters.
 <p>
-Tries not to remove hyphens preceded by spaces if this could lead to
-ambiguities as described in
+Tries not to remove hyphens preceded by spaces or underlines if this
+could lead to ambiguities as described in
 <a href="http://unicode.org/unicode/reports/tr18/#Name_Properties">http://unicode.org/unicode/reports/tr18/#Name_Properties</a>.
 <p>
 All CL-UNICODE functions which accept string <em>names</em> for characters
@@ -895,8 +895,11 @@ CL-USER 6 > (canonicalize-name (canonicalize-name "TIBETAN LETTER A"))
 
 CL-USER 7 > (canonicalize-name (canonicalize-name "TIBETAN LETTER -A"))
 "TIBETANLETTER -A"
+
+CL-USER 8 > (canonicalize-name "Tibetan_Letter_-A")
+"TibetanLetter -A"
 </pre>
-Note that the preceding space is relevant in the ambiguous cases (but
+Note that the preceding chracter is relevant in the ambiguous cases (but
 there are only three of them):
 <pre>
 CL-USER 8 > (char= (<a href="#character-named" class=none>character-named</a> "TibetanLetter A") (<a href="#character-named" class=none>character-named</a> "TibetanLetter -A"))
@@ -1160,6 +1163,9 @@ CL-USER 4 > (char-code #\Alef)
 set <a href="#*try-lisp-syntax-p*"><code>*TRY-LISP-SYNTAX-P*</code></a>
 to a true value when enabling the alternative syntax, so that you can
 still use the short syntax (like <code>#\a</code>) for characters.)
+<p>
+For an alternative syntax for <em>strings</em>
+see <a href="http://weitz.de/cl-interpol/">CL-INTERPOL</a>.
 </blockquote>
 
 <!-- End of entry for ENABLE-ALTERNATIVE-CHARACTER-SYNTAX -->
@@ -1264,7 +1270,7 @@ Here are all exported symbols of CL-UNICODE in alphabetical order linked to thei
 This documentation was prepared with <a href="http://weitz.de/documentation-template/">DOCUMENTATION-TEMPLATE</a>.
 </p>
 <p>
-$Header: /usr/local/cvsrep/cl-unicode/doc/index.html,v 1.10 2008/07/23 02:22:20 edi Exp $
+$Header: /usr/local/cvsrep/cl-unicode/doc/index.html,v 1.12 2008/07/23 14:55:26 edi Exp $
 <p><a href="http://weitz.de/index.html">BACK TO MY HOMEPAGE</a>
 
 </body>

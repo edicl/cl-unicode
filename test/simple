@@ -1,5 +1,5 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-UNICODE-TEST; Base: 10 -*-
-;;; $Header: /usr/local/cvsrep/cl-unicode/test/simple,v 1.13 2008/07/21 23:12:56 edi Exp $
+;;; $Header: /usr/local/cvsrep/cl-unicode/test/simple,v 1.14 2008/07/23 14:11:42 edi Exp $
 
 ;;; some simple tests for CL-UNICODE - entered manually and to be read
 ;;; in the CL-UNICODE-TEST package; all forms are expected to return a
@@ -390,8 +390,10 @@
 
 ;; ambiguous names (see NORMALIZE-NAME)
 (= #xf68 (character-named "TIBETAN LETTER A" :want-code-point-p t))
+(= #xf68 (character-named "Tibetan_Letter_A" :want-code-point-p t))
 (= #xf68 (character-named "TIBETANLETTERA" :want-code-point-p t))
 (= #xf60 (character-named "TIBETAN LETTER -A" :want-code-point-p t))
+(= #xf60 (character-named "Tibetan_Letter_-A" :want-code-point-p t))
 (= #xfb8 (character-named "TIBETAN SUBJOINED LETTER A" :want-code-point-p t))
 (= #xfb8 (character-named "TIBETANSUBJOINEDLETTERA" :want-code-point-p t))
 (= #xfb0 (character-named "TIBETAN SUBJOINED LETTER -A" :want-code-point-p t))

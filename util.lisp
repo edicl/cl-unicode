@@ -1,5 +1,5 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-UNICODE; Base: 10 -*-
-;;; $Header: /usr/local/cvsrep/cl-unicode/util.lisp,v 1.26 2008/07/22 12:20:14 edi Exp $
+;;; $Header: /usr/local/cvsrep/cl-unicode/util.lisp,v 1.27 2008/07/23 14:11:40 edi Exp $
 
 ;;; Copyright (c) 2008, Dr. Edmund Weitz. All rights reserved.
 
@@ -45,10 +45,11 @@ ambiguities as described in
 All CL-UNICODE functions which accept string \"names\" for characters
 or properties will canonicalize the name first using this function and
 will then look up the name case-insensitively."
-  (values (ppcre:regex-replace-all "( -A| O-E)$|[-_\\s]" name
+  (values (ppcre:regex-replace-all "[ _](-A|O-E)$|[-_\\s]" name
                                    (lambda (match register)
                                      (declare (ignore match))
-                                     (or register ""))
+                                     (cond (register (format nil " ~A" register))
+                                           (t "")))
                                    :simple-calls t)))
 
 (defun property-symbol (name)
