@@ -1,5 +1,5 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-UNICODE; Base: 10 -*-
-;;; $Header: /usr/local/cvsrep/cl-unicode/util.lisp,v 1.27 2008/07/23 14:11:40 edi Exp $
+;;; $Header: /usr/local/cvsrep/cl-unicode/util.lisp,v 1.29 2008/07/24 14:46:20 edi Exp $
 
 ;;; Copyright (c) 2008, Dr. Edmund Weitz. All rights reserved.
 
@@ -166,44 +166,74 @@ unified ideograph the name of which can be algorithmically derived."
     (when (cjk-unified-ideograph-p code-point)
       code-point)))
 
-(defconstant +s-base+ #xac00
-  "The constant `SBase' from chapter 3 of the Unicode book.")
-(defconstant +l-base+ #x1100
-  "The constant `LBase' from chapter 3 of the Unicode book.")
-(defconstant +v-base+ #x1161
-  "The constant `VBase' from chapter 3 of the Unicode book.")
-(defconstant +t-base+ #x11a7
-  "The constant `TBase' from chapter 3 of the Unicode book.")
-(defconstant +v-count+ 21
-  "The constant `VCount' from chapter 3 of the Unicode book.")
-(defconstant +t-count+ 28
-  "The constant `TCount' from chapter 3 of the Unicode book.")
-(define-symbol-macro +n-count+
-  ;; the constant `NCount' from chapter 3 of the Unicode book
-  (* +v-count+ +t-count+))
+(defmacro define-hangul-constant (name value)
+  (flet ((create-symbol (name)
+           (intern (format nil "+~:@(~C-~A~)+" (char name 0) (subseq name 1)) :cl-unicode)))
+    `(eval-when (:compile-toplevel :load-toplevel :execute)
+       (defconstant ,(create-symbol name) ,value
+         ,(format nil "The constant `~A' from chapter 3 of the Unicode book." name)))))
 
+(define-hangul-constant "SBase" #xac00)
+(define-hangul-constant "LBase" #x1100)
+(define-hangul-constant "VBase" #x1161)
+(define-hangul-constant "TBase" #x11a7)
+(define-hangul-constant "VCount" 21)
+(define-hangul-constant "TCount" 28)
+(define-hangul-constant "NCount" (* +v-count+ +t-count+))
+
+(declaim (inline compute-hangul-name))
 (defun compute-hangul-name (code-point)
-  "Algorithmically derives the Hangul syllable name of the character
-with code point CODE-POINT as described in section 3.12 of the Unicode
-book."
+  "Algorithmically derives the Hangul syllable name \(the part behind
+\"HANGUL SYLLABLE \") of the character with code point CODE-POINT as
+described in section 3.12 of the Unicode book."
+  (declare #.*standard-optimize-settings*)
+  (declare (fixnum code-point))
   (let* ((s-index (- code-point +s-base+))
          (l-value (+ +l-base+ (floor s-index +n-count+)))
          (v-value (+ +v-base+ (floor (mod s-index +n-count+) +t-count+)))
          (t-value (+ +t-base+ (mod s-index +t-count+))))
-    (format nil "HANGUL SYLLABLE ~A~A~@[~A~]"
+    (declare (fixnum s-index t-value))
+    (format nil "~A~A~@[~A~]"
             (gethash l-value *jamo-short-names*)
             (gethash v-value *jamo-short-names*)
             (and (/= t-value +t-base+)
                  (gethash t-value *jamo-short-names*)))))
 
+(defconstant +first-hangul-syllable+ #xac00
+  "The code point of the first Hangul syllable the name of which can
+be algorithmically derived.")
+(defconstant +last-hangul-syllable+ #xd7a3
+  "The code point of the last Hangul syllable the name of which can be
+algorithmically derived.")
+
 (defun add-hangul-names ()
   "Computes the names for all Hangul syllables and registers them in
-the appropriate hash tables."
+the *HANGUL-SYLLABLES-TO-CODE-POINTS* hash table.  Used for
+CHARACTER-NAMED."
+  (declare #.*standard-optimize-settings*)
   (format t "~&;;; Computing Hangul syllable names")
-  (loop for code-point from #xac00 to #xd7a3
+  (loop for code-point from +first-hangul-syllable+ to +last-hangul-syllable+
         for name = (compute-hangul-name code-point)
-        do (setf (gethash (canonicalize-name name) *names-to-code-points*) code-point
-                 (gethash code-point *code-points-to-names*) name)))
+        do (setf (gethash name *hangul-syllables-to-code-points*) code-point)))
+
+(defun hangul-syllable-p (code-point)
+  "Returns a true value if CODE-POINT is the code point of a Hangul
+syllable for which we can algorithmically derive the name."
+  (<= +first-hangul-syllable+ code-point +last-hangul-syllable+))
+
+(defun maybe-compute-hangul-syllable-name (code-point)
+  "Computes the name for CODE-POINT if CODE-POINT denotes a Hangul
+syllable the name of which can be algorithmically derived."
+  (when (hangul-syllable-p code-point)
+    (format nil "HANGUL SYLLABLE ~X" (compute-hangul-name code-point))))
+
+(defun maybe-find-hangul-syllable-code-point (name)
+  "Computes the code point for NAME if NAME is the name of a Hangul
+syllable the name of which can be algorithmically derived."
+  (ppcre:register-groups-bind (name)
+      ;; canonicalized
+      ("(?i)^HANGULSYLLABLE([A-Z]*)$" name)
+    (gethash name *hangul-syllables-to-code-points*)))
 
 (defmacro ensure-code-point (c)
   "Helper macro so that C can be treated like a code point even if it
@@ -214,7 +244,7 @@ is a Lisp character."
        (character (char-code ,c)))))
 
 (defun unicode-name-reader (stream char arg)
-  "The reader functino used when the alternative character syntax is
+  "The reader function used when the alternative character syntax is
 enabled."
   (declare (ignore char arg))
   (let ((name (with-output-to-string (out)

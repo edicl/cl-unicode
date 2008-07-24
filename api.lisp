@@ -1,5 +1,5 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-UNICODE; Base: 10 -*-
-;;; $Header: /usr/local/cvsrep/cl-unicode/api.lisp,v 1.30 2008/07/22 02:42:13 edi Exp $
+;;; $Header: /usr/local/cvsrep/cl-unicode/api.lisp,v 1.31 2008/07/24 14:46:20 edi Exp $
 
 ;;; Copyright (c) 2008, Dr. Edmund Weitz. All rights reserved.
 
@@ -39,6 +39,7 @@ point.")
    (unicode-name (char-code char)))
   (:method ((code-point integer))
    (or (gethash code-point *code-points-to-names*)
+       (maybe-compute-hangul-syllable-name code-point)
        (maybe-compute-cjk-name code-point))))
 
 (defgeneric unicode1-name (c)
@@ -102,6 +103,7 @@ CHAR-CODE-LIMIT is smaller than +CODE-POINT-LIMIT+."
     (setq scripts-to-try (list scripts-to-try)))
   (let* ((canonicalized-name (canonicalize-name name))
          (code-point (or (gethash canonicalized-name *names-to-code-points*)
+                         (maybe-find-hangul-syllable-code-point canonicalized-name)
                          (maybe-find-cjk-code-point canonicalized-name)
                          (and try-unicode1-names-p
                               (gethash canonicalized-name *unicode1-names-to-code-points*))

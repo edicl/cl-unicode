@@ -1,5 +1,5 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-UNICODE; Base: 10 -*-
-;;; $Header: /usr/local/cvsrep/cl-unicode/specials.lisp,v 1.14 2008/07/23 01:08:24 edi Exp $
+;;; $Header: /usr/local/cvsrep/cl-unicode/specials.lisp,v 1.16 2008/07/24 14:50:37 edi Exp $
 
 ;;; Copyright (c) 2008, Dr. Edmund Weitz. All rights reserved.
 
@@ -36,7 +36,7 @@
   "A hash tables which maps property symbols \(see PROPERTY-SYMBOL) to
 their \"canonical names\", i.e. to strings.")
 
-(defvar *names-to-code-points* (make-hash-table :test 'equalp :size 31000)
+(defvar *names-to-code-points* (make-hash-table :test 'equalp :size 20000)
   "A hash table which \(case-insensitively) maps \"canonicalized\"
 character names to their code points.")
 
@@ -44,7 +44,7 @@ character names to their code points.")
   "A hash table which \(case-insensitively) maps \"canonicalized\"
 Unicode 1.0 character names to their code points.")
 
-(defvar *code-points-to-names* (make-hash-table :size 31000)
+(defvar *code-points-to-names* (make-hash-table :size 20000)
   "A hash table which maps code points to the corresponding character
 names.")
 
@@ -84,6 +84,10 @@ tests for the corresponding property.")
 (defvar *jamo-short-names* (make-hash-table :size 70)
   "A hash table which maps code points to their Jamo short names.
 Needed to compute Hangul syllable names - see COMPUTE-HANGUL-NAME.")
+
+(defvar *hangul-syllables-to-code-points* (make-hash-table :test 'equalp :size 12000)
+  "A hash table which \(case-insensitively) maps Hangul syllable name
+parts to their code points.")
 
 (defvar *try-unicode1-names-p* t
   "This is the default value for the :TRY-UNICODE1-NAMES-P keyword

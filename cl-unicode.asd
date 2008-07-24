@@ -1,5 +1,5 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-USER; Base: 10 -*-
-;;; $Header: /usr/local/cvsrep/cl-unicode/cl-unicode.asd,v 1.21 2008/07/21 22:09:22 edi Exp $
+;;; $Header: /usr/local/cvsrep/cl-unicode/cl-unicode.asd,v 1.22 2008/07/24 14:56:31 edi Exp $
 
 ;;; Copyright (c) 2008, Dr. Edmund Weitz.  All rights reserved.
 
@@ -63,7 +63,7 @@ them."
   (call-next-method))
 
 (defsystem :cl-unicode
-  :version "0.1.0"
+  :version "0.1.1"
   :serial t
   :depends-on (:cl-ppcre)
   :components ((:file "packages")

@@ -1,5 +1,5 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Base: 10 -*-
-;;; $Header: /usr/local/cvsrep/cl-unicode/packages.lisp,v 1.23 2008/07/22 02:42:13 edi Exp $
+;;; $Header: /usr/local/cvsrep/cl-unicode/packages.lisp,v 1.24 2008/07/24 14:46:20 edi Exp $
 
 ;;; Copyright (c) 2008, Dr. Edmund Weitz. All rights reserved.
 
@@ -31,7 +31,9 @@
 
 (defpackage :cl-unicode
   (:use :cl)
-  (:import-from :cl-ppcre :with-rebinding)
+  (:import-from :cl-ppcre
+                :*standard-optimize-settings*
+                :with-rebinding)
   (:export :+code-point-limit+
            :*scripts-to-try*
            :*try-abbreviations-p*
