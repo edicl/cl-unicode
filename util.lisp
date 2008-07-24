@@ -1,5 +1,5 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-UNICODE; Base: 10 -*-
-;;; $Header: /usr/local/cvsrep/cl-unicode/util.lisp,v 1.29 2008/07/24 14:46:20 edi Exp $
+;;; $Header: /usr/local/cvsrep/cl-unicode/util.lisp,v 1.30 2008/07/24 15:19:43 edi Exp $
 
 ;;; Copyright (c) 2008, Dr. Edmund Weitz. All rights reserved.
 
@@ -167,8 +167,12 @@ unified ideograph the name of which can be algorithmically derived."
       code-point)))
 
 (defmacro define-hangul-constant (name value)
+  "Simple helper macro to define some constants needed for the Hangul
+algorithm below."
   (flet ((create-symbol (name)
            (intern (format nil "+~:@(~C-~A~)+" (char name 0) (subseq name 1)) :cl-unicode)))
+    ;; use EVAL-WHEN so the following definitions can refer to the
+    ;; value already
     `(eval-when (:compile-toplevel :load-toplevel :execute)
        (defconstant ,(create-symbol name) ,value
          ,(format nil "The constant `~A' from chapter 3 of the Unicode book." name)))))
