@@ -215,7 +215,9 @@ algorithmically derived.")
 the *HANGUL-SYLLABLES-TO-CODE-POINTS* hash table.  Used for
 CHARACTER-NAMED."
   (declare #.*standard-optimize-settings*)
-  (format t "~&;;; Computing Hangul syllable names")
+  (when *compile-verbose*
+    (format t "~&;;; Computing Hangul syllable names")
+    (force-output))
   (loop for code-point from +first-hangul-syllable+ to +last-hangul-syllable+
         for name = (compute-hangul-name code-point)
         do (setf (gethash name *hangul-syllables-to-code-points*) code-point)))

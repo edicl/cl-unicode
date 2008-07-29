@@ -43,8 +43,9 @@ but rather using <..., First> and <..., Last>."
   (let ((variables (extract-variables bindings))
         (types (extract-types bindings)))
     `(let ((pathname (merge-pathnames ,file-name (merge-pathnames "data/" *this-file*))))
-       (format t "~&;;; Parsing Unicode file ~A" (file-namestring pathname))
-       (force-output)
+       (when *compile-verbose*
+         (format t "~&;;; Parsing Unicode file ~A" (file-namestring pathname))
+         (force-output))
        (with-open-file (binary-in pathname :element-type 'flex:octet)
          ;; Unicode data files must be read as UTF-8
          (let ((in (flex:make-flexi-stream binary-in :external-format '(:utf-8 :eol-style :lf))))
@@ -274,7 +275,8 @@ source code files for CL-UNICODE."
 data files and building the corresponding Lisp datastructures in
 memory."
   (fill-database)
-  (format t "~&;;; Building hash tables")
-  (force-output)
+  (when *compile-verbose
+    (format t "~&;;; Building hash tables")
+    (force-output))
   (build-name-mappings)
   (build-case-mapping))

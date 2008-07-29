@@ -106,8 +106,9 @@ writes to the file denoted by RELATIVE-PATH - a path relative to the
 location of this source file.  Writes a Lisp header to the files
 unless NO-HEADER-P is true."
   `(let ((pathname (merge-pathnames ,relative-path *this-file*)))
-     (format t "~&;;; Writing source file ~A" (file-namestring pathname))
-     (force-output)
+     (when *compile-verbose*
+       (format t "~&;;; Writing source file ~A" (file-namestring pathname))
+       (force-output))
      (with-open-file (,stream pathname
                               :direction :output
                               :if-exists :supersede)
