@@ -275,7 +275,7 @@ source code files for CL-UNICODE."
 data files and building the corresponding Lisp datastructures in
 memory."
   (fill-database)
-  (when *compile-verbose
+  (when *compile-verbose*
     (format t "~&;;; Building hash tables")
     (force-output))
   (build-name-mappings)
