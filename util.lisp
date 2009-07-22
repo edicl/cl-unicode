@@ -53,7 +53,7 @@ will then look up the name case-insensitively."
                                    :simple-calls t)))
 
 (defun property-symbol (name)
-  "Returns a symbol in the CL-UNICODE-NAMES packages \(which is only
+  "Returns a symbol in the CL-UNICODE-NAMES package \(which is only
 used for this purpose) which can stand in for the string NAME in
 look-ups.  The symbol's name is the result of \"canonicalizing\" and
 then upcasing NAME.
