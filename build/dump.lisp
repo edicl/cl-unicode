@@ -105,7 +105,10 @@ return two values - the symbol and the canonical name of the symbol."
 writes to the file denoted by RELATIVE-PATH - a path relative to the
 location of this source file.  Writes a Lisp header to the files
 unless NO-HEADER-P is true."
-  `(let ((pathname (merge-pathnames ,relative-path *this-file*)))
+  `(let ((pathname (merge-pathnames ,relative-path
+                                    (make-pathname :name nil
+                                                   :type nil
+                                                   :defaults *this-file*))))
      (when *compile-verbose*
        (format t "~&;;; Writing source file ~A" (file-namestring pathname))
        (force-output))
