@@ -190,7 +190,7 @@ DUMP-LIST."
 is not used in read.lisp) and uses it to create a file
 \"derived-properties\" which will be used by CL-UNICODE-TEST."
   (with-output-to-source-file (out (make-pathname :name "derived-properties"
-                                                  :type :unspecific
+                                                  :type nil
                                                   :directory '(:relative :up "test"))
                                    :no-header-p t)
     (let (last-test)
