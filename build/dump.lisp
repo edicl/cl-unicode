@@ -108,6 +108,7 @@ unless NO-HEADER-P is true."
   `(let ((pathname (merge-pathnames ,relative-path
                                     (make-pathname :name nil
                                                    :type nil
+                                                   :version nil
                                                    :defaults *this-file*))))
      (when *compile-verbose*
        (format t "~&;;; Writing source file ~A" (file-namestring pathname))

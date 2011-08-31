@@ -63,7 +63,7 @@ them."
   (call-next-method))
 
 (defsystem :cl-unicode
-  :version "0.1.1"
+  :version "0.1.2"
   :serial t
   :depends-on (:cl-ppcre)
   :components ((:file "packages")
