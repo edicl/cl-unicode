@@ -1,10 +1,14 @@
+Version 0.1.4
+2012-05-29
+Bind *print-readably* to nil on CLISP when generating methods.lisp (thanks to Stas Boukarev)
+
 Version 0.1.3
 2012-05-04
 Make compatible with AllegroCL's "modern" mode (thanks to Gary King and Noldus Reijnders)
 
 Version 0.1.2
 2011-08-31
-Make pathname creation conformant (thanks to Juan José Garcia-Ripoll)
+Make pathname creation conformant (thanks to Juan Jose Garcia-Ripoll)
 
 Version 0.1.1
 2008-07-24

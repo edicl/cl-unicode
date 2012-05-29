@@ -63,8 +63,9 @@ them."
   (call-next-method))
 
 (defsystem :cl-unicode
-  :version "0.1.3"
+  :version "0.1.4"
   :serial t
+  :description "Portable Unicode Library"
   :depends-on (:cl-ppcre)
   :components ((:file "packages")
                (:file "specials")
