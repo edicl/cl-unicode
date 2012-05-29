@@ -1,7 +1,7 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-UNICODE; Base: 10 -*-
-;;; $Header: /usr/local/cvsrep/cl-unicode/build/util.lisp,v 1.12 2008/07/21 14:23:09 edi Exp $
+;;; $Header: /usr/local/cvsrep/cl-unicode/build/util.lisp,v 1.13 2012-05-04 21:17:45 edi Exp $
 
-;;; Copyright (c) 2008, Dr. Edmund Weitz. All rights reserved.
+;;; Copyright (c) 2008-2012, Dr. Edmund Weitz. All rights reserved.
 
 ;;; Redistribution and use in source and binary forms, with or without
 ;;; modification, are permitted provided that the following conditions

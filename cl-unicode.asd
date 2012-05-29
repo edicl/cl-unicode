@@ -1,7 +1,7 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-USER; Base: 10 -*-
-;;; $Header: /usr/local/cvsrep/cl-unicode/cl-unicode.asd,v 1.22 2008/07/24 14:56:31 edi Exp $
+;;; $Header: /usr/local/cvsrep/cl-unicode/cl-unicode.asd,v 1.23 2012-05-04 21:17:44 edi Exp $
 
-;;; Copyright (c) 2008, Dr. Edmund Weitz.  All rights reserved.
+;;; Copyright (c) 2008-2012, Dr. Edmund Weitz.  All rights reserved.
 
 ;;; Redistribution and use in source and binary forms, with or without
 ;;; modification, are permitted provided that the following conditions
@@ -63,7 +63,7 @@ them."
   (call-next-method))
 
 (defsystem :cl-unicode
-  :version "0.1.2"
+  :version "0.1.3"
   :serial t
   :depends-on (:cl-ppcre)
   :components ((:file "packages")

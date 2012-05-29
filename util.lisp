@@ -1,7 +1,7 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-UNICODE; Base: 10 -*-
-;;; $Header: /usr/local/cvsrep/cl-unicode/util.lisp,v 1.30 2008/07/24 15:19:43 edi Exp $
+;;; $Header: /usr/local/cvsrep/cl-unicode/util.lisp,v 1.33 2012-05-04 21:17:44 edi Exp $
 
-;;; Copyright (c) 2008, Dr. Edmund Weitz. All rights reserved.
+;;; Copyright (c) 2008-2012, Dr. Edmund Weitz. All rights reserved.
 
 ;;; Redistribution and use in source and binary forms, with or without
 ;;; modification, are permitted provided that the following conditions
@@ -183,7 +183,7 @@ algorithm below."
 (define-hangul-constant "TBase" #x11a7)
 (define-hangul-constant "VCount" 21)
 (define-hangul-constant "TCount" 28)
-(define-hangul-constant "NCount" (* +v-count+ +t-count+))
+(define-hangul-constant "NCount" (* +V-COUNT+ +T-COUNT+))
 
 (declaim (inline compute-hangul-name))
 (defun compute-hangul-name (code-point)
@@ -192,15 +192,15 @@ algorithm below."
 described in section 3.12 of the Unicode book."
   (declare #.*standard-optimize-settings*)
   (declare (fixnum code-point))
-  (let* ((s-index (- code-point +s-base+))
-         (l-value (+ +l-base+ (floor s-index +n-count+)))
-         (v-value (+ +v-base+ (floor (mod s-index +n-count+) +t-count+)))
-         (t-value (+ +t-base+ (mod s-index +t-count+))))
+  (let* ((s-index (- code-point +S-BASE+))
+         (l-value (+ +L-BASE+ (floor s-index +N-COUNT+)))
+         (v-value (+ +V-BASE+ (floor (mod s-index +N-COUNT+) +T-COUNT+)))
+         (t-value (+ +T-BASE+ (mod s-index +T-COUNT+))))
     (declare (fixnum s-index t-value))
     (format nil "~A~A~@[~A~]"
             (gethash l-value *jamo-short-names*)
             (gethash v-value *jamo-short-names*)
-            (and (/= t-value +t-base+)
+            (and (/= t-value +T-BASE+)
                  (gethash t-value *jamo-short-names*)))))
 
 (defconstant +first-hangul-syllable+ #xac00

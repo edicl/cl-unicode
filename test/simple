@@ -1,5 +1,5 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-UNICODE-TEST; Base: 10 -*-
-;;; $Header: /usr/local/cvsrep/cl-unicode/test/simple,v 1.14 2008/07/23 14:11:42 edi Exp $
+;;; $Header: /usr/local/cvsrep/cl-unicode/test/simple,v 1.15 2012-05-04 21:17:48 edi Exp $
 
 ;;; some simple tests for CL-UNICODE - entered manually and to be read
 ;;; in the CL-UNICODE-TEST package; all forms are expected to return a
@@ -306,7 +306,7 @@
 (null (character-named "HANGUL SYLLABLE FOO"))
 
 ;; CJK ideograph names
-(string= (unicode-name #x340f) "CJK UNIFIED IDEOGRAPH-340F")
+(string-equal (unicode-name #x340f) "CJK UNIFIED IDEOGRAPH-340F")
 (= #x340f (character-named "CJK UNIFIED IDEOGRAPH-340F" :want-code-point-p t))
 (= #x340f (character-named "CJK unified ideograph 340F" :want-code-point-p t))
 (null (character-named "CJK UNIFIED IDEOGRAPH-33fe"))
