@@ -33,6 +33,7 @@
   "Parses STRING as a hexadecimal number."
   (parse-integer string :radix 16))
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
 (defun canonicalize-name (name)
   "Converts the string NAME into a \"canonicalized\" name which can be
 used for unambiguous look-ups by removing all whitespace, hyphens, and
@@ -91,6 +92,7 @@ always holds if there is a property name for <symbol>.
 
 See also PROPERTY-SYMBOL."
   (values (gethash symbol *canonical-names*)))
+) ;; END EVAL-WHEN
 
 (defun tree-lookup (code-point tree)
   "Looks up an attribute for CODE-POINT in the binary search tree
