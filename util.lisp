@@ -106,32 +106,6 @@ TREE.  TREE is a tree as created by BUILD-TREE."
                           (t value))))))
     (try tree)))
 
-(defun try-abbreviations (name scripts-to-try)
-  "Helper function called by CHARACTER-NAMED when the
-:TRY-ABBREVIATIONS-P keyword argument is true.  Tries to interpret
-NAME as an abbreviation for a longer Unicode name and returns the
-corresponding code point if it succeeds."
-  (flet ((size-word (string)
-           (if (ppcre:scan "[A-Z]" string) "CAPITAL" "SMALL"))
-         (try (script size-word short-name)
-           (or (character-named (format nil "~A ~A letter ~A"
-                                        script size-word short-name)
-                                :want-code-point-p t)
-               (character-named (format nil "~A letter ~A"
-                                        script short-name)
-                                :want-code-point-p t)
-               (character-named (format nil "~A ~A"
-                                        script short-name)
-                                :want-code-point-p t))))
-    (ppcre:register-groups-bind (script short-name)
-        ("^([^:]+):([^:]+)$" name)
-      (let ((size-word (size-word short-name)))
-        (return-from try-abbreviations
-          (try script size-word short-name))))
-    (loop with size-word = (size-word name)
-          for script in scripts-to-try
-          thereis (try script size-word name))))  
-
 (defgeneric mapping (c position want-code-point-p)
   (:documentation "Returns the simple case mapping for the character C
 \(a code point or a Lisp character) in position POSITION where 0 means
@@ -251,32 +225,3 @@ is a Lisp character."
        (integer ,c)
        (character (char-code ,c)))))
 
-(defun unicode-name-reader (stream char arg)
-  "The reader function used when the alternative character syntax is
-enabled."
-  (declare (ignore char arg))
-  (let ((name (with-output-to-string (out)
-                (write-char (read-char stream t nil t) out)
-                (loop for next-char = (read-char stream t nil t)
-                      while (find next-char "abcdefghijklmnopqrstuvwxyz0123456789_-+:"
-                                  :test 'char-equal)
-                      do (write-char next-char out)
-                      finally (unread-char next-char stream)))))
-    (or (character-named name)
-        (error 'character-not-found :name name))))
-
-(defun %enable-alternative-character-syntax ()
-  "Internal function used to enable alternative character syntax and
-store current readtable on stack."
-  (push *readtable* *previous-readtables*)
-  (setq *readtable* (copy-readtable))
-  (set-dispatch-macro-character #\# #\\ #'unicode-name-reader)
-  (values))
-
-(defun %disable-alternative-character-syntax ()
-  "Internal function used to restore previous readtable." 
-  (setq *readtable*
-        (if *previous-readtables*
-          (pop *previous-readtables*)
-          (copy-readtable nil)))
-  (values))
