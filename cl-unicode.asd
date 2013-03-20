@@ -35,6 +35,7 @@
 (in-package :cl-unicode-asd)
 
 (defsystem :cl-unicode/base
+  :depends-on (:cl-ppcre)
   :serial t
   :components  ((:file "packages")
                 (:file "specials")
@@ -68,7 +69,7 @@ them."
   :version "0.1.4"
   :serial t
   :description "Portable Unicode Library"
-  :depends-on (:cl-ppcre :cl-unicode/base)
+  :depends-on (:cl-unicode/base)
   :components ((:file "conditions")
                (:generated-cl-source-file "lists")
                (:generated-cl-source-file "hash-tables")
