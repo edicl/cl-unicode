@@ -34,14 +34,17 @@
 
 (in-package :cl-unicode-asd)
 
-(defsystem :build-cl-unicode
+(defsystem :cl-unicode/base
+  :depends-on (:cl-ppcre)
   :serial t
-  ;; FLEXI-STREAMS is only needed to /build/ CL-UNICODE
-  :depends-on (:flexi-streams)
   :components  ((:file "packages")
                 (:file "specials")
-                (:file "util")
-                (:module "build"
+                (:file "util")))
+
+(defsystem :cl-unicode/build
+  ;; FLEXI-STREAMS is only needed to /build/ CL-UNICODE
+  :depends-on (:cl-unicode/base :flexi-streams)
+  :components  ((:module "build"
                  :serial t
                  :components ((:file "util")
                               (:file "char-info")
@@ -59,18 +62,15 @@ first."))
 GENERATED-CL-SOURCE-FILE actually exist before we try to compile
 them."
   (unless (every 'probe-file (input-files operation component))
-    (operate 'load-op :build-cl-unicode))
+    (load-system :cl-unicode/build))
   (call-next-method))
 
 (defsystem :cl-unicode
   :version "0.1.4"
   :serial t
   :description "Portable Unicode Library"
-  :depends-on (:cl-ppcre)
-  :components ((:file "packages")
-               (:file "specials")
-               (:file "util")
-               (:file "conditions")
+  :depends-on (:cl-unicode/base)
+  :components ((:file "conditions")
                (:generated-cl-source-file "lists")
                (:generated-cl-source-file "hash-tables")
                (:file "api")
@@ -78,8 +78,8 @@ them."
                (:file "test-functions")
                (:file "derived")
                (:file "alias")))
-               
-(defsystem :cl-unicode-test
+
+(defsystem :cl-unicode/test
   :depends-on (:cl-unicode)
   :components ((:module "test"
                         :serial t
@@ -87,5 +87,5 @@ them."
                                      (:file "tests")))))
 
 (defmethod perform ((o test-op) (c (eql (find-system :cl-unicode))))
-  (operate 'load-op :cl-unicode-test)
-  (funcall (intern (symbol-name :run-all-tests) (find-package :cl-unicode-test))))
+  (load-system :cl-unicode/test)
+  (funcall (intern (symbol-name :run-all-tests) (find-package :cl-unicode/test))))
