@@ -1,3 +1,12 @@
+Version 0.1.5
+2014-11-28
+rename CHANGELOG.txt to CHANGELOG (Hans Huebner)
+update support information (Hans Huebner)
+Updated to latest Unicode version (Elias Martenson)
+Fix the .asd so cl-unicode/base depends-on cl-ppcre. (Francois-Rene Rideau)
+Move some functions from util to api to avoid deferred warnings (Francois-Rene Rideau)
+Use internal ASDF system names findable by ASDF3 (still not by ASDF2). (Francois-Rene Rideau)
+
 Version 0.1.4
 2012-05-29
 Bind *print-readably* to nil on CLISP when generating methods.lisp (thanks to Stas Boukarev)

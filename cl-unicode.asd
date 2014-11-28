@@ -66,7 +66,7 @@ them."
   (call-next-method))
 
 (defsystem :cl-unicode
-  :version "0.1.4"
+  :version "0.1.5"
   :serial t
   :description "Portable Unicode Library"
   :depends-on (:cl-unicode/base)
