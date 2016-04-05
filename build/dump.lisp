@@ -243,4 +243,3 @@ the \"missing\" CL-UNICODE source files."
   (dump-data-structures)
   (setq *char-database* nil))
 
-(create-source-files)
