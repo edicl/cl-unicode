@@ -72,4 +72,4 @@
                         :serial t
                         :components ((:file "packages")
                                      (:file "tests"))))
-  :perform (test-op (o c) (symbol-call :cl-unicode/test '#:run-all-tests)))
+  :perform (test-op (o c) (symbol-call :cl-unicode-test '#:run-all-tests)))
