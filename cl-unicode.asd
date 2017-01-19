@@ -30,6 +30,7 @@
 (defsystem :cl-unicode/base
   :depends-on (:cl-ppcre)
   :serial t
+  :license "BSD-2-Clause"
   :components  ((:file "packages")
                 (:file "specials")
                 (:file "util")))
@@ -37,6 +38,7 @@
 (defsystem :cl-unicode/build
   ;; FLEXI-STREAMS is only needed to /build/ CL-UNICODE
   :depends-on (:cl-unicode/base :flexi-streams)
+  :license "BSD-2-Clause"
   :components ((:module "build"
                 :serial t
                 :components ((:file "util")
@@ -51,6 +53,7 @@
   :serial t
   :description "Portable Unicode Library"
   :depends-on (:cl-unicode/base)
+  :license "BSD-2-Clause"
   :components ((:file "conditions")
                (:file "lists")
                (:file "hash-tables")
