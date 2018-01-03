@@ -168,6 +168,7 @@ hash-tables.lisp using DUMP-HASH-TABLE."
     (dump-hash-table '*code-points-to-unicode1-names* out)
     (dump-hash-table '*case-mappings* out)
     (dump-hash-table '*jamo-short-names* out)
+    (dump-hash-table '*property-aliases* out)
     ;; finally add code which adds the computed Hangul syllable names
     ;; at load time
     (print '(add-hangul-names) out)))
@@ -216,7 +217,7 @@ SUCCESSP is NIL.  The test designator isn't actually written to the
 stream, though, but handed over to REALLY-ADD-TEST."
                  (when (< code-point +code-point-limit+)
                    (really-add-test `(,code-point ,property ,successp)))))
-        (with-unicode-file ((code-point-range property) "DerivedCoreProperties.txt")
+        (with-unicode-codepoint-file ((code-point-range property) "DerivedCoreProperties.txt")
           (cond ((atom code-point-range)
                  (add-test code-point-range property)
                  (add-test (1+ code-point-range) property nil))

@@ -298,7 +298,7 @@ See also BINARY-PROPERTIES.")
   (:method ((char character) property)
    (has-binary-property (char-code char) property))
   (:method (char (property-name string))
-   (has-binary-property char (property-symbol property-name)))
+   (has-binary-property char (lookup-property-alias property-name)))
   (:method ((code-point integer) (property-symbol symbol))
    (find property-symbol (binary-props code-point) :test #'eq)))
 

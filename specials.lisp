@@ -81,6 +81,10 @@ symbols.")
   "A hash table which maps property symbols to a test function which
 tests for the corresponding property.")
 
+(defvar *property-aliases* (make-hash-table :test 'equalp :size 360)
+  "A hash table which maps property names to the long name for
+the property.")
+
 (defvar *jamo-short-names* (make-hash-table :size 70)
   "A hash table which maps code points to their Jamo short names.
 Needed to compute Hangul syllable names - see COMPUTE-HANGUL-NAME.")
