@@ -78,6 +78,10 @@ See also PROPERTY-NAME."
     (setf (gethash symbol *canonical-names*) name)
     symbol))
 
+(defun lookup-property-alias (name)
+  "Returns the long-name of the given property alias"
+  (gethash (string-upcase (canonicalize-name name)) *property-aliases*))
+
 (defun property-name (symbol)
   "Returns a name \(not \"the\" name) for a property symbol SYMBOL if
 it is known to CL-UNICODE.  Note that

@@ -29,7 +29,30 @@
 
 (in-package :cl-unicode)
 
-(defmacro with-unicode-file (((&rest bindings) file-name &optional two-line-ranges) &body body)
+(defmacro with-unicode-file ((file-name contents-name) &body body)
+  "Utility macro to parse a file which is formatted as described in
+<http://unicode.org/Public/UNIDATA/UCD.html#UCD_File_Format>.  The
+file named FILE-NAME is searched for in the directory \"data/\"
+relative to this source file.  The code then iterates through the file
+and executes BODY for each non-comment line binding contents to the
+list of fields in the line"
+  `(let ((pathname (merge-pathnames ,file-name (merge-pathnames "data/" *this-file*))))
+       (when *compile-verbose*
+         (format t "~&;;; Parsing Unicode file ~A" (file-namestring pathname))
+         (force-output))
+       (with-open-file (binary-in pathname :element-type 'flex:octet)
+         ;; Unicode data files must be read as UTF-8
+         (let ((in (flex:make-flexi-stream binary-in :external-format '(:utf-8 :eol-style :lf))))
+           (loop
+            (flet ((get-line-contents ()
+                     (let ((line (or (read-line in nil) (return))))
+                       (and (not (ppcre:scan "^\\s*(?:#|$)" line))
+                            (ppcre:split "\\s*(#.*)?$|\\s*;\\s*" line :limit most-positive-fixnum)))))
+              (let ((,contents-name (get-line-contents)))
+                (when ,contents-name
+                  ,@body))))))))
+
+(defmacro with-unicode-codepoint-file (((&rest bindings) file-name &optional two-line-ranges) &body body)
   "Utility macro to parse a file which is formatted as described in
 <http://unicode.org/Public/UNIDATA/UCD.html#UCD_File_Format>.  The
 file named FILE-NAME is searched for in the directory \"data/\"
@@ -42,27 +65,14 @@ a file like \"UnicodeData.txt\" where ranges aren't denoted as usual
 but rather using <..., First> and <..., Last>."
   (let ((variables (extract-variables bindings))
         (types (extract-types bindings)))
-    `(let ((pathname (merge-pathnames ,file-name (merge-pathnames "data/" *this-file*))))
-       (when *compile-verbose*
-         (format t "~&;;; Parsing Unicode file ~A" (file-namestring pathname))
-         (force-output))
-       (with-open-file (binary-in pathname :element-type 'flex:octet)
-         ;; Unicode data files must be read as UTF-8
-         (let ((in (flex:make-flexi-stream binary-in :external-format '(:utf-8 :eol-style :lf))))
-           (loop
-            (flet ((get-line-contents ()
-                     (let ((line (or (read-line in nil) (return))))
-                       (and (not (ppcre:scan "^\\s*(?:#|$)" line))
-                            (ppcre:split "\\s*#.*$|\\s*;\\s*" line :limit most-positive-fixnum)))))
-              (let ((contents (get-line-contents)))
-                (when contents
-                  (destructuring-bind ,variables
-                      (parse-one-line contents ',types (list ,@(extract-defaults bindings)))
-                    ,@(when two-line-ranges
-                        `((when (ppcre:scan "^<.*, First>$" ,(second variables))
-                            (let ((range-end (first (parse-one-line (list (first (get-line-contents)))))))
-                              (setq ,(first variables) (cons ,(first variables) range-end))))))
-                    ,@body))))))))))
+    `(with-unicode-file (,file-name contents)
+      (destructuring-bind ,variables
+          (parse-one-line contents ',types (list ,@(extract-defaults bindings)))
+        ,@(when two-line-ranges
+            `((when (ppcre:scan "^<.*, First>$" ,(second variables))
+                (let ((range-end (first (parse-one-line (list (first (get-line-contents)))))))
+                  (setq ,(first variables) (cons ,(first variables) range-end))))))
+        ,@body))))
 
 (defmacro with-code-point-range ((var range) &body body)
   "Utility macro which executes BODY with VAR bound to each code point
@@ -80,7 +90,7 @@ entry per code point which is stored in *CHAR-DATABASE*."
   ;; by definition, we'll never see this property in the file, so we
   ;; have to add it to *GENERAL-CATEGORIES* explicitly
   (setq *general-categories* (list '#.(property-symbol "Cn")))
-  (with-unicode-file ((code-point-range
+  (with-unicode-codepoint-file ((code-point-range
                        name
                        (general-category symbol)
                        (combining-class integer)
@@ -127,7 +137,7 @@ entry per code point which is stored in *CHAR-DATABASE*."
 (defun read-scripts ()
   "Parses the file \"Scripts.txt\" and adds the information about the
 script to the corresponding entries in *CHAR-DATABASE*."
-  (with-unicode-file ((code-point-range (script symbol)) "Scripts.txt")
+  (with-unicode-codepoint-file ((code-point-range (script symbol)) "Scripts.txt")
     (pushnew script *scripts* :test #'eq)
     (with-code-point-range (code-point code-point-range)
       (let ((char-info (aref *char-database* code-point)))
@@ -137,7 +147,7 @@ script to the corresponding entries in *CHAR-DATABASE*."
 (defun read-code-blocks ()
   "Parses the file \"Blocks.txt\" and adds the information about the
 code block to the corresponding entries in *CHAR-DATABASE*."
-  (with-unicode-file ((code-point-range (code-block symbol)) "Blocks.txt")
+  (with-unicode-codepoint-file ((code-point-range (code-block symbol)) "Blocks.txt")
     (pushnew code-block *code-blocks* :test #'eq)
     (with-code-point-range (code-point code-point-range)
       (let ((char-info (aref *char-database* code-point)))
@@ -149,7 +159,7 @@ code block to the corresponding entries in *CHAR-DATABASE*."
 properties to the corresponding entries in *CHAR-DATABASE*."
   ;; this property was derived from UnicodeData.txt already
   (setq *binary-properties* (list '#.(property-symbol "BidiMirrored")))
-  (with-unicode-file ((code-point-range (property symbol)) "PropList.txt")
+  (with-unicode-codepoint-file ((code-point-range (property symbol)) "PropList.txt")
     ;; we don't need this information as we derive it from a code
     ;; point not being mentioned in UnicodeData.txt - see also the
     ;; initform for GENERAL-CATEGORY in the definition of CHAR-INFO
@@ -167,7 +177,7 @@ properties to the corresponding entries in *CHAR-DATABASE*."
 (defun read-derived-age ()
   "Parses the file \"DerivedAge.txt\" and adds information about the
 \"age\" to the corresponding entries in *CHAR-DATABASE*."
-  (with-unicode-file ((code-point-range (age age)) "DerivedAge.txt")
+  (with-unicode-codepoint-file ((code-point-range (age age)) "DerivedAge.txt")
     (with-code-point-range (code-point code-point-range)
       (let ((char-info (aref *char-database* code-point)))
         (when char-info
@@ -176,7 +186,7 @@ properties to the corresponding entries in *CHAR-DATABASE*."
 (defun read-mirroring-glyphs ()
   "Parses the file \"BidiMirroring.txt\" and adds information about
 mirroring glyphs to the corresponding entries in *CHAR-DATABASE*."
-  (with-unicode-file ((code-point-range (mirroring-glyph hex)) "BidiMirroring.txt")
+  (with-unicode-codepoint-file ((code-point-range (mirroring-glyph hex)) "BidiMirroring.txt")
     (with-code-point-range (code-point code-point-range)
       (let ((char-info (aref *char-database* code-point)))
         (when char-info
@@ -187,9 +197,24 @@ mirroring glyphs to the corresponding entries in *CHAR-DATABASE*."
 short names in the *JAMO-SHORT-NAMES* hash table.  This information is
 later used to compute Hangul syllable names."
   (clrhash *jamo-short-names*)
-  (with-unicode-file ((code-point-range (short-name string "")) "Jamo.txt")
+  (with-unicode-codepoint-file ((code-point-range (short-name string "")) "Jamo.txt")
     (with-code-point-range (code-point code-point-range)
       (setf (gethash code-point *jamo-short-names*) short-name))))
+
+(defun read-property-aliases ()
+  "Parses the file \"PropertyAliases.txt\" and stores information about
+aliases for properties in the *PROPERTY-ALIASES* hash table.  This
+information is used to get properties by any alias."
+  (clrhash *property-aliases*)
+  (with-unicode-file ("PropertyAliases.txt" contents)
+    (destructuring-bind (short-name long-name &rest additional-names) contents
+      (let ((symb (property-symbol long-name))
+            (long-name (string-upcase (canonicalize-name long-name)))
+            (short-name (string-upcase (canonicalize-name short-name))))
+        (setf (gethash long-name *property-aliases*) symb
+              (gethash short-name *property-aliases*) symb)
+        (loop for alt-name in additional-names
+          :do (setf (gethash (string-upcase (canonicalize-name alt-name)) *property-aliases*) symb))))))
 
 (defun default-bidi-class (char-info)
   "Returns the default Bidi class for the character described by the
@@ -237,6 +262,7 @@ source code files for CL-UNICODE."
   (read-derived-age)
   (read-mirroring-glyphs)
   (read-jamo)
+  (read-property-aliases)
   (set-default-bidi-classes))
 
 (defun build-name-mappings ()
