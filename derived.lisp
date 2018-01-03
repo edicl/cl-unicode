@@ -60,6 +60,7 @@
     ("Alphabetic" "L" "Nl" "OtherAlphabetic")
     ("Lowercase" "Ll" "OtherLowercase")
     ("Uppercase" "Lu" "OtherUppercase")
+    ("Cased" "Lowercase" "Uppercase" "Lt")
     ("GraphemeExtend" "Me" "Mn" "OtherGraphemeExtend")
     ("GraphemeBase" ("C" "Zl" "Zp" "GraphemeExtend"))
     ("IDStart" "L" "Nl" "OtherIDStart" ("PatternSyntax" "PatternWhiteSpace"))
@@ -69,7 +70,13 @@
     ("DefaultIgnorableCodePoint" "OtherDefaultIgnorableCodePoint" "Cf" "VariationSelector"
                                  ("WhiteSpace" (#xfff9 . #xfffb) (#x600 . #x603) #x6dd #x70f))))
 
-;; todo: xid_start, xid_continue,
+;; todo: Case_Ignorable, Changes_When_Lowercased, Changes_When_Uppercased,
+;;        Changes_When_Titlecased, Changes_When_Casefolded
+;Case_Ignorable := Mn + Me + Cf + Lm + Sk + Word_Break in {MidLetter, MidNumLet, Single_Quote}
+;Changes_When_Lowercased := toLowercase(toNFD(X)) != toNFD(X)
+;Changes_When_Uppercased := toUppercase(toNFD(X)) != toNFD(X)
+;Changes_When_Titlecased := toTitlecase(toNFD(X)) != toNFD(X)
+;Changes_When_Casefolded := toCasefold(toNFD(X)) != toNFD(X)
 
 (defun build-derived-test-function (property-designators)
   (labels ((build-test-function (designator)
