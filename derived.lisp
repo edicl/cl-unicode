@@ -61,6 +61,12 @@
     ("Lowercase" "Ll" "OtherLowercase")
     ("Uppercase" "Lu" "OtherUppercase")
     ("Cased" "Lowercase" "Uppercase" "Lt")
+    ("CaseIgnorable" "Mn" "Me" "Cf" "Lm" "Sk"
+                     ,(lambda (c) (find (word-break c)
+                                        `("Single_Quote"
+                                          "MidLetter"
+                                          "MidNumLet")
+                                        :test 'equal)))
     ("GraphemeExtend" "Me" "Mn" "OtherGraphemeExtend")
     ("GraphemeBase" ("C" "Zl" "Zp" "GraphemeExtend"))
     ("IDStart" "L" "Nl" "OtherIDStart" ("PatternSyntax" "PatternWhiteSpace"))
@@ -70,9 +76,8 @@
     ("DefaultIgnorableCodePoint" "OtherDefaultIgnorableCodePoint" "Cf" "VariationSelector"
                                  ("WhiteSpace" (#xfff9 . #xfffb) (#x600 . #x603) #x6dd #x70f))))
 
-;; todo: Case_Ignorable, Changes_When_Lowercased, Changes_When_Uppercased,
+;; todo: Changes_When_Lowercased, Changes_When_Uppercased,
 ;;        Changes_When_Titlecased, Changes_When_Casefolded
-;Case_Ignorable := Mn + Me + Cf + Lm + Sk + Word_Break in {MidLetter, MidNumLet, Single_Quote}
 ;Changes_When_Lowercased := toLowercase(toNFD(X)) != toNFD(X)
 ;Changes_When_Uppercased := toUppercase(toNFD(X)) != toNFD(X)
 ;Changes_When_Titlecased := toTitlecase(toNFD(X)) != toNFD(X)
@@ -95,7 +100,9 @@
                 (assert (and (typep from 'integer) (typep to 'integer)) (designator)
                   "Car and cdr of ~S must both be integers." designator)
                 (lambda (c)
-                  (<= from (ensure-code-point c) to))))))
+                  (<= from (ensure-code-point c) to))))
+               (function
+                designator)))
            (collect-test-functions (designators)
              (loop for designator in designators
                    collect (build-test-function designator))))
