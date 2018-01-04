@@ -205,6 +205,15 @@ See also CODE-BLOCKS.")
   (:method ((char character))
    (code-block (char-code char))))
 
+(defgeneric word-break (c)
+  (:documentation "Returns the Word_Break property of a character as a
+string.  C can be the character's code point \(a positive integer) or a
+\(Lisp) character assuming its character code is also its Unicode code
+point.  The second return value \(if there is one) is the property symbol of the
+word break.")
+  (:method ((char character))
+   (word-break (char-code char))))
+
 (defgeneric age (c)
   (:documentation "Returns the \"age\" of a character or NIL if there
 is no age entry for that particular character.  The age of a character

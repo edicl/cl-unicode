@@ -50,6 +50,13 @@ property symbol.")
                :type (or symbol null)
                :documentation "The block the character belongs to - a
 property symbol.")
+   (word-break :initarg :word-break
+               ;"other" is value unless indicated otherwise
+               :initform (register-property-symbol "Other")
+               :accessor word-break*
+               :type symbol
+               :documentation "The word_break value of the character
+- a property symbol")
    (unicode1-name :initarg :unicode1-name
                   :initform nil
                   :reader unicode1-name
