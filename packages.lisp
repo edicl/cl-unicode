@@ -67,6 +67,7 @@
            :script
            :scripts
            :titlecase-mapping
+           :word-break
            :unicode-error
            :unicode-name
            :unicode1-name

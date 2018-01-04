@@ -154,6 +154,16 @@ code block to the corresponding entries in *CHAR-DATABASE*."
         (when char-info
           (setf (code-block* char-info) code-block))))))
 
+(defun read-word-breaks ()
+  "Parses the file \"Scripts.txt\" and adds the information about the
+script to the corresponding entries in *CHAR-DATABASE*."
+  (with-unicode-codepoint-file ((code-point-range (word-break symbol)) "auxiliary/WordBreakProperty.txt")
+    ;(pushnew word-break *word-breaks* :test #'eq)
+    (with-code-point-range (code-point code-point-range)
+      (let ((char-info (aref *char-database* code-point)))
+        (when char-info
+          (setf (word-break* char-info) word-break))))))
+
 (defun read-binary-properties ()
   "Parses the file \"PropList.txt\" and adds information about binary
 properties to the corresponding entries in *CHAR-DATABASE*."
@@ -258,6 +268,7 @@ source code files for CL-UNICODE."
   (read-character-data)
   (read-scripts)
   (read-code-blocks)
+  (read-word-breaks)
   (read-binary-properties)
   (read-derived-age)
   (read-mirroring-glyphs)

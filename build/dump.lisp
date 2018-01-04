@@ -133,6 +133,7 @@ using DUMP-METHOD."
   (with-output-to-source-file (out "../methods.lisp")
     (dump-method 'script 'script* out)
     (dump-method 'code-block 'code-block* out)
+    (dump-method 'word-break 'word-break* out)
     (dump-method 'age 'age* out #'equal)
     (dump-method 'general-category 'general-category* out)
     (dump-method 'bidi-class 'bidi-class* out)
