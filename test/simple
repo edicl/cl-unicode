@@ -14,7 +14,7 @@
 (eql (unicode-name (code-char 1)) nil)
 (= 1 (char-code (character-named "START OF HEADING")))
 (= 1 (character-named "START OF HEADING" :want-code-point-p t))
-(null (character-named "START OF HEADING" :try-unicode1-names-p nil))
+(null (character-named "START OF HEADING" :try-unicode1-names-p nil :try-lisp-names-p nil))
 (string= "Cc" (general-category 1))
 (string= "Cc" (general-category (code-char 1)))
 (has-property 1 "Cc")
@@ -423,7 +423,7 @@
 (null (character-named "U+10" :try-hex-notation-p t :try-lisp-names-p nil))
 (= #xffef (character-named "U+ffef" :try-hex-notation-p t :want-code-point-p t))
 (= #x10ffff (character-named "U+10ffff" :try-hex-notation-p t :want-code-point-p t))
-(null (character-named "U+110000" :try-hex-notation-p t :want-code-point-p t))
+(null (character-named "U+110000" :try-hex-notation-p t  :try-lisp-names-p nil :want-code-point-p t))
 
 ;; alternative character syntax - see the settings of the
 ;; corresponding special variables in CL-UNICODE-TEST::SIMPLE-TESTS
