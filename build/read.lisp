@@ -286,7 +286,7 @@ source code files for CL-UNICODE."
   (clrhash *code-points-to-unicode1-names*)
   (loop for char-info across *char-database*
         for name = (and char-info (name char-info))
-        for unicode1-name = (and char-info (unicode1-name char-info))
+        for unicode1-name = (and char-info (unicode1-name* char-info))
         for code-point = (and char-info (code-point char-info))
         when name
         do (setf (gethash code-point *code-points-to-names*) name

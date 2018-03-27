@@ -59,7 +59,7 @@ property symbol.")
 - a property symbol")
    (unicode1-name :initarg :unicode1-name
                   :initform nil
-                  :reader unicode1-name
+                  :reader unicode1-name*
                   :type (or string null)
                   :documentation "The Unicode 1.0 name of the
 character - a string.")
