@@ -235,7 +235,7 @@ CHAR-INFO object CHAR-INFO.  The default is computed as explained in
                     (<= #xFB50 code-point #xFDFF)
                     (<= #xFE70 code-point #xFEFF))
                 (not (find '#.(property-symbol "NoncharacterCodePoint")
-                           (binary-props* code-point))))
+                           (binary-props* char-info))))
            '#.(property-symbol "AL"))
           ((or (<= #x0590 code-point #x05FF)
                (<= #x07C0 code-point #x08ff)
