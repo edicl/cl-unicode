@@ -49,7 +49,7 @@
   :perform (load-op (o c) (symbol-call :cl-unicode '#:create-source-files)))
 
 (defsystem :cl-unicode
-  :version "0.1.5"
+  :version "0.1.6"
   :serial t
   :description "Portable Unicode Library"
   :depends-on (:cl-unicode/base)
