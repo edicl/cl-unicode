@@ -158,11 +158,33 @@ code block to the corresponding entries in *CHAR-DATABASE*."
   "Parses the file \"Scripts.txt\" and adds the information about the
 script to the corresponding entries in *CHAR-DATABASE*."
   (with-unicode-codepoint-file ((code-point-range (word-break symbol)) "auxiliary/WordBreakProperty.txt")
-    ;(pushnew word-break *word-breaks* :test #'eq)
+                                        ;(pushnew word-break *word-breaks* :test #'eq)
     (with-code-point-range (code-point code-point-range)
       (let ((char-info (aref *char-database* code-point)))
         (when char-info
           (setf (word-break* char-info) word-break))))))
+
+
+(defun read-idna-mapping ()
+  "Parses the file \"Scripts.txt\" and adds the information about the
+script to the corresponding entries in *CHAR-DATABASE*."
+  (with-unicode-codepoint-file ((code-point-range
+                                 (mapping-type symbol)
+                                 (mapped-to hex-list nil)
+                                 (scope symbol "Default"))
+                                "idna/IdnaMappingTable.txt")
+    (with-code-point-range (code-point code-point-range)
+      (unless (eq mapping-type '#.(property-symbol "disallowed"))
+        (let ((char-info (aref *char-database* code-point))
+              (mapping (list mapping-type mapped-to scope)))
+          (if char-info
+              (setf (idna-mapping* char-info) mapping)
+              ;; this file actually contains some information for
+              ;; unassigned (but reserved) code points, like e.g. #xfff0
+              (setf char-info (make-instance 'char-info :code-point code-point
+                                                        :idna-mapping mapping)
+                    (aref *char-database* code-point) char-info)))))))
+
 
 (defun read-binary-properties ()
   "Parses the file \"PropList.txt\" and adds information about binary
@@ -274,6 +296,7 @@ source code files for CL-UNICODE."
   (read-mirroring-glyphs)
   (read-jamo)
   (read-property-aliases)
+  (read-idna-mapping)
   (set-default-bidi-classes))
 
 (defun build-name-mappings ()

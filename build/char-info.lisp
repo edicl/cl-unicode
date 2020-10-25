@@ -51,7 +51,7 @@ property symbol.")
                :documentation "The block the character belongs to - a
 property symbol.")
    (word-break :initarg :word-break
-               ;"other" is value unless indicated otherwise
+                                        ;"other" is value unless indicated otherwise
                :initform (register-property-symbol "Other")
                :accessor word-break*
                :type symbol
@@ -133,7 +133,13 @@ the character \(as a code point) if explicitly specified.")
                       :reader titlecase-mapping*
                       :type (or fixnum null)
                       :documentation "The simple titlecase mapping of
-the character \(as a code point) if explicitly specified."))
+the character \(as a code point) if explicitly specified.")
+   (idna-mapping :initarg :idna-mapping
+                 :initform nil
+                 :accessor idna-mapping*
+                 :type list
+                 :documentation "IDNA Mapping table entry for the code point"
+                 ))
   (:documentation "A CHAR-INFO object is a datastructure which is used
 to \(temporarily) hold the information about one character as gathered
 from parsing the Unicode data files - see the code in read.lisp."))

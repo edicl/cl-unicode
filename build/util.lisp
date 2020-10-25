@@ -116,14 +116,14 @@ denoting a type which is not necessarily a Lisp type).  If VALUE is
 the empty string, DEFAULT is returned instead unless DEFAULT is :ERROR
 in which case an error is signalled.")
   (:method (value type default)
-   "The default method for unrecognized type specs."
-   (error "Don't know how to parse type ~S." type))
+    "The default method for unrecognized type specs."
+    (error "Don't know how to parse type ~S." type))
   (:method :around (value type default)
-   "The method to take care of default values."
-   (cond ((and (string= value "") (eq default :error))
-          (error "No value and no default provided"))
-         ((string= value "") default)
-         (t (call-next-method)))))
+    "The method to take care of default values."
+    (cond ((and (string= value "") (eq default :error))
+           (error "No value and no default provided"))
+          ((string= value "") default)
+          (t (call-next-method)))))
 
 (defmethod parse-value (value (type (eql 'string)) default)
   "The method for strings simply returns VALUE."
@@ -148,6 +148,11 @@ REGISTER-PROPERTY-SYMBOL)."
 (defmethod parse-value (value (type (eql 'hex)) default)
   "The method for hexadecimal integers."
   (parse-hex value))
+
+(defmethod parse-value (value (type (eql 'hex-list)) default)
+  "The method for hexadecimal integers."
+  (loop for val in (ppcre:split " " value)
+        collect (parse-value val 'hex default)))
 
 (defmethod parse-value (value (type (eql 'rational)) default)
   "The method for rationals which are written like Lisp rationals."
@@ -175,8 +180,8 @@ apply to the rest of PARTS.
 Note that a call like \(PARSE-ONE-LINE PARTS) means that just the code
 point part is parsed and returned."
   (cons (parse-code-point (first parts))
-        (loop for part in (rest parts)
-              for type in types
+        (loop for type in types
               for default in defaults
-              when type 
-              collect (parse-value part type default))))
+              for data = (rest parts) then (rest data)
+              when type
+                collect (parse-value (car data) type default))))
