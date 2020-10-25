@@ -139,7 +139,11 @@ in which case an error is signalled.")
   "The method for symbol which converts the string to a \"property
 symbol\" \(see PROPERTY-SYMBOL) and registers it \(see
 REGISTER-PROPERTY-SYMBOL)."
-  (register-property-symbol value))
+  (if value
+      (register-property-symbol value)
+      (if (symbolp default)
+          default
+          (register-property-symbol value))))
 
 (defmethod parse-value (value (type (eql 'integer)) default)
   "The method for \(decimal) integers."

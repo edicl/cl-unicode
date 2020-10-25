@@ -141,7 +141,8 @@ using DUMP-METHOD."
     (dump-method 'numeric-value 'numeric-value* out #'eql)
     (dump-method 'combining-class 'combining-class* out #'eql)
     (dump-method 'bidi-mirroring-glyph% 'bidi-mirroring-glyph* out #'eql)
-    (dump-method 'binary-props 'binary-props* out #'equal)))
+    (dump-method 'binary-props 'binary-props* out #'equal)
+    (dump-method 'idna-mapping 'idna-mapping* out #'equal)))
 
 (defun dump-hash-table (hash-table-name stream)
   "Writes code to the STREAM which reinitializes the hash table

@@ -171,7 +171,7 @@ script to the corresponding entries in *CHAR-DATABASE*."
   (with-unicode-codepoint-file ((code-point-range
                                  (mapping-type symbol)
                                  (mapped-to hex-list nil)
-                                 (scope symbol "Default"))
+                                 (scope symbol nil))
                                 "idna/IdnaMappingTable.txt")
     (with-code-point-range (code-point code-point-range)
       (unless (eq mapping-type '#.(property-symbol "disallowed"))
