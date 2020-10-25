@@ -71,7 +71,8 @@
            :unicode-error
            :unicode-name
            :unicode1-name
-           :uppercase-mapping))
+           :uppercase-mapping
+           :idna-mapping))
                               
 (defpackage :cl-unicode-names
   (:use))
