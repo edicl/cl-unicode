@@ -72,7 +72,8 @@
            :unicode-name
            :unicode1-name
            :uppercase-mapping
-           :idna-mapping))
-                              
+           :idna-mapping
+           :canonical-decomposition))
+
 (defpackage :cl-unicode-names
   (:use))

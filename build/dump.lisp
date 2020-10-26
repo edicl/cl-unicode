@@ -142,7 +142,8 @@ using DUMP-METHOD."
     (dump-method 'combining-class 'combining-class* out #'eql)
     (dump-method 'bidi-mirroring-glyph% 'bidi-mirroring-glyph* out #'eql)
     (dump-method 'binary-props 'binary-props* out #'equal)
-    (dump-method 'idna-mapping 'idna-mapping* out #'equal)))
+    (dump-method 'idna-mapping 'idna-mapping* out #'equal)
+    (dump-method 'decomposition-mapping 'decomposition-mapping* out #'equal)))
 
 (defun dump-hash-table (hash-table-name stream)
   "Writes code to the STREAM which reinitializes the hash table
@@ -169,6 +170,7 @@ hash-tables.lisp using DUMP-HASH-TABLE."
     (dump-hash-table '*unicode1-names-to-code-points* out)
     (dump-hash-table '*code-points-to-unicode1-names* out)
     (dump-hash-table '*case-mappings* out)
+    (dump-hash-table '*special-case-mappings* out)
     (dump-hash-table '*jamo-short-names* out)
     (dump-hash-table '*property-aliases* out)
     ;; finally add code which adds the computed Hangul syllable names
@@ -186,6 +188,7 @@ is assumed that all elements of the list can be printed readably."
 DUMP-LIST."
   (with-output-to-source-file (out "../lists.lisp")
     (dump-list '*general-categories* out)
+    (dump-list '*compatibility-formatting-tags* out)
     (dump-list '*scripts* out)
     (dump-list '*code-blocks* out)
     (dump-list '*binary-properties* out)
@@ -198,7 +201,7 @@ is not used in read.lisp) and uses it to create a file
   (with-output-to-source-file (out (make-pathname :name "derived-properties"
                                                   :type nil
                                                   :directory '(:relative :up "test"))
-                                   :no-header-p t)
+                               :no-header-p t)
     (let (last-test)
       (labels ((really-add-test (test)
                  "Writes the test designator from ADD-TEST in a
@@ -226,7 +229,7 @@ stream, though, but handed over to REALLY-ADD-TEST."
                 (t
                  (add-test (car code-point-range) property)
                  (add-test (cdr code-point-range) property)
-                 (add-test (1+ (cdr code-point-range)) property nil))))       
+                 (add-test (1+ (cdr code-point-range)) property nil))))
         (print last-test out)))))
 
 (defun dump-data-structures ()

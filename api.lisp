@@ -320,12 +320,15 @@ that case mapping only makes sense for characters with the \"LC\"
 property.
 
 Returns the code point instead of the character if WANT-CODE-POINT-P
-is true.  This can be especially useful for Lisp implementations where
+is true. Returns a list of code points if WANT-SPECIAL-P is true.
+This can be especially useful for Lisp implementations where
 CHAR-CODE-LIMIT is smaller than +CODE-POINT-LIMIT+."
-  (mapping c 0 want-code-point-p))
+  (if want-special-p
+      (special-mapping c 1 context)
+      (mapping c 1 want-code-point-p)))
 
-(defun lowercase-mapping (c &key want-code-point-p)
-  "Returns the simple lowercase mapping of a character.  C can be the
+(defun lowercase-mapping (c &key want-code-point-p want-special-p context)
+  "Returns the lowercase mapping of a character.  C can be the
 character's code point \(a positive integer) or a \(Lisp) character
 assuming its character code is also its Unicode code point.  Returns
 the character itself if no such mapping is explicitly defined.  Note
@@ -333,12 +336,15 @@ that case mapping only makes sense for characters with the \"LC\"
 property.
 
 Returns the code point instead of the character if WANT-CODE-POINT-P
-is true.  This can be especially useful for Lisp implementations where
+is true. Returns a list of code points if WANT-SPECIAL-P is true.
+This can be especially useful for Lisp implementations where
 CHAR-CODE-LIMIT is smaller than +CODE-POINT-LIMIT+."
-  (mapping c 1 want-code-point-p))
+  (if want-special-p
+      (special-mapping c 0 context)
+      (mapping c 0 want-code-point-p)))
 
-(defun titlecase-mapping (c &key want-code-point-p)
-  "Returns the simple titlecase mapping of a character.  C can be the
+(defun titlecase-mapping (c &key want-code-point-p want-special-p context)
+  "Returns the titlecase mapping of a character.  C can be the
 character's code point \(a positive integer) or a \(Lisp) character
 assuming its character code is also its Unicode code point.  Returns
 the character itself if no such mapping is explicitly defined.  Note
@@ -346,9 +352,12 @@ that case mapping only makes sense for characters with the \"LC\"
 property.
 
 Returns the code point instead of the character if WANT-CODE-POINT-P
-is true.  This can be especially useful for Lisp implementations where
+is true. Returns a list of code points if WANT-SPECIAL-P is true.
+This can be especially useful for Lisp implementations where
 CHAR-CODE-LIMIT is smaller than +CODE-POINT-LIMIT+."
-  (mapping c 2 want-code-point-p))
+  (if want-special-p
+      (special-mapping c 2 context)
+      (mapping c 2 want-code-point-p)))
 
 (defun general-categories ()
   "Returns a sorted list of all general categories known to
@@ -365,6 +374,17 @@ are the possible return values of SCRIPT."
   "Returns a sorted list of all blocks known to CL-UNICODE.  These are
 the possible return values of CODE-BLOCK."
   (sort (mapcar 'property-name *code-blocks*) 'string-lessp))
+
+(defgeneric canonical-decomposition (c)
+  (:documentation "Decomposes input according to Unicode Canonical Decomposition rules.")
+  (:method ((char character))
+    (canonical-decomposition (char-code char)))
+  (:method ((code-point integer))
+    (let ((mapping (decomposition-mapping code-point)))
+      (if (or (null mapping) (symbolp (car mapping)))
+          (list code-point)
+          (loop for c in mapping
+                nconc (canonical-decomposition c))))))
 
 (defun binary-properties ()
   "Returns a sorted list of all binary properties known to CL-UNICODE.
@@ -384,9 +404,9 @@ HAS-PROPERTY.  If ALL is true, known aliases \(like \"Letter\" for
 \"L\") are also included."
   (sort (cond (all (loop for key being the hash-keys of *property-map*
                          collect key))
-              (t (mapcar 'property-name 
+              (t (mapcar 'property-name
                          (loop for key being the hash-keys of *property-tests*
-                               collect key))))       
+                               collect key))))
         'string-lessp))
 
 (defgeneric property-test (property &key errorp)
@@ -474,4 +494,4 @@ you expect.  Technically, this'll pop a readtable from the stack
 described in ENABLE-ALTERNATIVE-CHARACTER-SYNTAX so that matching
 calls of these macros can be nested."
   `(eval-when (:compile-toplevel :load-toplevel :execute)
-    (%disable-alternative-character-syntax)))
+     (%disable-alternative-character-syntax)))

@@ -74,14 +74,29 @@
     ("XIDStart" "IDStart" (,@+xid-difference+ #xe33 #xeb3 (#xff9e . #xff9f)))
     ("XIDContinue" "IDContinue" ,+xid-difference+)
     ("DefaultIgnorableCodePoint" "OtherDefaultIgnorableCodePoint" "Cf" "VariationSelector"
-                                 ("WhiteSpace" (#xfff9 . #xfffb) (#x600 . #x603) #x6dd #x70f))))
+                                 ("WhiteSpace" (#xfff9 . #xfffb) (#x600 . #x603) #x6dd #x70f))
+    ("ChangesWhenLowercased" ,(lambda (c)
+                                (let ((nfd (canonical-decomposition c)))
+                                  (not (equal (lowercase-mapping nfd :want-special-p t) nfd)))))
+    ("ChangesWhenUppercased" ,(lambda (c)
+                                (let ((nfd (canonical-decomposition c)))
+                                  (not (equal (uppercase-mapping nfd :want-special-p t) nfd)))))
+    ("ChangesWhenTitlecased" ,(lambda (c)
+                                (let ((nfd (canonical-decomposition c)))
+                                  (not (equal (titlecase-mapping nfd :want-special-p t) nfd)))))
+    ("ChangesWhenCasemapped" ,(lambda (c)
+                                (let ((nfd (canonical-decomposition c)))
+                                  (or (not (equal (lowercase-mapping nfd :want-special-p t) nfd))
+                                      (not (equal (uppercase-mapping nfd :want-special-p t) nfd))
+                                      (not (equal (titlecase-mapping nfd :want-special-p t) nfd))))))))
+
 
 ;; todo: Changes_When_Lowercased, Changes_When_Uppercased,
 ;;        Changes_When_Titlecased, Changes_When_Casefolded
-;Changes_When_Lowercased := toLowercase(toNFD(X)) != toNFD(X)
-;Changes_When_Uppercased := toUppercase(toNFD(X)) != toNFD(X)
-;Changes_When_Titlecased := toTitlecase(toNFD(X)) != toNFD(X)
-;Changes_When_Casefolded := toCasefold(toNFD(X)) != toNFD(X)
+                                        ;Changes_When_Lowercased := toLowercase(toNFD(X)) != toNFD(X)
+                                        ;Changes_When_Uppercased := toUppercase(toNFD(X)) != toNFD(X)
+                                        ;Changes_When_Titlecased := toTitlecase(toNFD(X)) != toNFD(X)
+                                        ;Changes_When_Casefolded := toCasefold(toNFD(X)) != toNFD(X)
 
 (defun build-derived-test-function (property-designators)
   (labels ((build-test-function (designator)
@@ -89,7 +104,7 @@
                (string
                 (let ((test-function (gethash (gethash designator *property-map*) *property-tests*)))
                   (assert test-function (designator)
-                    "Unknown property name ~S." designator)
+                          "Unknown property name ~S." designator)
                   test-function))
                (integer
                 (lambda (c)
@@ -97,31 +112,31 @@
                (cons
                 (let ((from (car designator))
                       (to (car designator)))
-                (assert (and (typep from 'integer) (typep to 'integer)) (designator)
-                  "Car and cdr of ~S must both be integers." designator)
-                (lambda (c)
-                  (<= from (ensure-code-point c) to))))
+                  (assert (and (typep from 'integer) (typep to 'integer)) (designator)
+                          "Car and cdr of ~S must both be integers." designator)
+                  (lambda (c)
+                    (<= from (ensure-code-point c) to))))
                (function
                 designator)))
            (collect-test-functions (designators)
              (loop for designator in designators
                    collect (build-test-function designator))))
     (let ((positive-test-functions
-           (collect-test-functions (remove-if-not 'atom property-designators)))
+            (collect-test-functions (remove-if-not 'atom property-designators)))
           (negative-test-functions
-           (collect-test-functions (find-if-not 'atom property-designators))))
+            (collect-test-functions (find-if-not 'atom property-designators))))
       (cond (negative-test-functions
              (lambda (c)
                (and (or (null positive-test-functions)
                         (loop for test-function in positive-test-functions
-                              thereis (funcall (the function test-function) c)))
+                                thereis (funcall (the function test-function) c)))
                     (not (loop for test-function in negative-test-functions
-                               thereis (funcall (the function test-function) c))))))                  
+                                 thereis (funcall (the function test-function) c))))))                  
             (t
              (lambda (c)
                (or (null positive-test-functions)
                    (loop for test-function in positive-test-functions
-                         thereis (funcall (the function test-function) c)))))))))
+                           thereis (funcall (the function test-function) c)))))))))
                
 (defun build-derived-test-functions ()
   (loop for (name . property-names) in *derived-map*

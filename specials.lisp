@@ -57,8 +57,14 @@ names.")
 containing the lowercase, uppercase, and titlecasse mapping of the
 corresponding character \(unless all of them are NIL).")
 
+(defvar *special-case-mappings* (make-hash-table)
+  "A hash table which maps code points to a list of special case mapping rules.")
+
 (defvar *general-categories* nil
   "A list of all property symbols which denote general categories.")
+
+(defvar *compatibility-formatting-tags* nil
+  "A list of Character Decomposition compatibility formatting tags.")
 
 (defvar *scripts* nil
   "A list of all property symbols which denote scripts.")

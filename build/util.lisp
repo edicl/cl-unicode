@@ -154,9 +154,20 @@ REGISTER-PROPERTY-SYMBOL)."
   (parse-hex value))
 
 (defmethod parse-value (value (type (eql 'hex-list)) default)
-  "The method for hexadecimal integers."
+  "The method for lists of hexadecimal integers."
   (loop for val in (ppcre:split " " value)
         collect (parse-value val 'hex default)))
+
+(defmethod parse-value (value (type (eql 'tagged-hex-list)) default)
+  "The method for hexadecimal integers."
+  (loop for val in (ppcre:split " " value)
+        collect (parse-value val
+                             (if (and val
+                                      (char= #\< (char val 0)))
+                                 'symbol
+                                 'hex)
+                             default)))
+
 
 (defmethod parse-value (value (type (eql 'rational)) default)
   "The method for rationals which are written like Lisp rationals."

@@ -139,7 +139,12 @@ the character \(as a code point) if explicitly specified.")
                  :accessor idna-mapping*
                  :type list
                  :documentation "IDNA Mapping table entry for the code point"
-                 ))
+                 )
+   (decomposition-mapping :initarg :decomposition-mapping
+                          :initform nil
+                          :accessor decomposition-mapping*
+                          :type list
+                          :documentation "Character decomposition mapping including optional Compatibility Formatting Tag"))
   (:documentation "A CHAR-INFO object is a datastructure which is used
 to \(temporarily) hold the information about one character as gathered
 from parsing the Unicode data files - see the code in read.lisp."))

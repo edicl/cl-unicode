@@ -91,23 +91,26 @@ entry per code point which is stored in *CHAR-DATABASE*."
   ;; have to add it to *GENERAL-CATEGORIES* explicitly
   (setq *general-categories* (list '#.(property-symbol "Cn")))
   (with-unicode-codepoint-file ((code-point-range
-                       name
-                       (general-category symbol)
-                       (combining-class integer)
-                       (bidi-class symbol)
-                       ;; decomposition mapping, ignored for now
-                       _
-                       (decimal-digit integer nil)
-                       (digit integer nil)
-                       (numeric rational nil)
-                       (bidi-mirrored boolean)
-                       (unicode1-name string nil)
-                       ;; ISO comment, ignored
-                       _
-                       (uppercase-mapping hex nil)
-                       (lowercase-mapping hex nil)
-                       (titlecase-mapping hex nil))
-                      "UnicodeData.txt" t)
+                                 name
+                                 (general-category symbol)
+                                 (combining-class integer)
+                                 (bidi-class symbol)
+                                 (decomposition-mapping tagged-hex-list nil)
+                                 (decimal-digit integer nil)
+                                 (digit integer nil)
+                                 (numeric rational nil)
+                                 (bidi-mirrored boolean)
+                                 (unicode1-name string nil)
+                                 ;; ISO comment, ignored
+                                 _
+                                 (uppercase-mapping hex nil)
+                                 (lowercase-mapping hex nil)
+                                 (titlecase-mapping hex nil))
+                                "UnicodeData.txt" t)
+    (when (and (listp decomposition-mapping)
+               (car decomposition-mapping)
+               (symbolp (car decomposition-mapping)))
+      (pushnew (car decomposition-mapping) *compatibility-formatting-tags* :test #'eq))
     (pushnew general-category *general-categories* :test #'eq)
     (pushnew bidi-class *bidi-classes* :test #'eq)
     ;; if the name starts with #\<, it's not really a name but denotes
@@ -123,6 +126,7 @@ entry per code point which is stored in *CHAR-DATABASE*."
                            :general-category general-category
                            :combining-class combining-class
                            :bidi-class bidi-class
+                           :decomposition-mapping decomposition-mapping
                            :numeric-type (cond (decimal-digit '#.(property-symbol "Decimal"))
                                                (digit '#.(property-symbol "Digit"))
                                                (numeric '#.(property-symbol "Numeric")))
@@ -185,6 +189,17 @@ script to the corresponding entries in *CHAR-DATABASE*."
                                                         :idna-mapping mapping)
                     (aref *char-database* code-point) char-info)))))))
 
+(defun add-hangul-decomposition ()
+  "Computes the canonical decomposition for all Hangul syllables."
+  (declare #.*standard-optimize-settings*)
+  (when *compile-verbose*
+    (format t "~&;;; Computing Hangul syllable decomposition")
+    (force-output))
+  (loop for code-point from +first-hangul-syllable+ to +last-hangul-syllable+
+        for mapping = (compute-hangul-decomposition code-point)
+        for char-info = (aref *char-database* code-point)
+        when char-info
+          do (setf (decomposition-mapping* char-info) mapping)))
 
 (defun read-binary-properties ()
   "Parses the file \"PropList.txt\" and adds information about binary
@@ -246,7 +261,19 @@ information is used to get properties by any alias."
         (setf (gethash long-name *property-aliases*) symb
               (gethash short-name *property-aliases*) symb)
         (loop for alt-name in additional-names
-          :do (setf (gethash (string-upcase (canonicalize-name alt-name)) *property-aliases*) symb))))))
+              :do (setf (gethash (string-upcase (canonicalize-name alt-name)) *property-aliases*) symb))))))
+
+(defun read-special-casing ()
+  "Parses the file \"SpecialCasing.txt\" and stores information about special casing rules."
+  (clrhash *special-case-mappings*)
+  (with-unicode-file ("SpecialCasing.txt" contents)
+    (destructuring-bind (code-str lower title upper &rest conditions) contents
+      (let ((code-point (parse-hex code-str))
+            (rules (list (remove-if #'(lambda (x) (or (null x) (string= "" x))) conditions)
+                         (parse-value lower 'hex-list nil)
+                         (parse-value upper 'hex-list nil)
+                         (parse-value title 'hex-list nil))))
+        (pushnew rules (gethash code-point *special-case-mappings*))))))
 
 (defun default-bidi-class (char-info)
   "Returns the default Bidi class for the character described by the
@@ -282,6 +309,7 @@ memory \(specifically the *CHAR-DATABASE* array) to write the missing
 source code files for CL-UNICODE."
   (setq *char-database* (make-empty-char-database)
         *general-categories* nil
+        *compatibility-formatting-tags* nil
         *scripts* nil
         *code-blocks* nil
         *binary-properties* nil
@@ -297,7 +325,9 @@ source code files for CL-UNICODE."
   (read-jamo)
   (read-property-aliases)
   (read-idna-mapping)
-  (set-default-bidi-classes))
+  (read-special-casing)
+  (set-default-bidi-classes)
+  (add-hangul-decomposition))
 
 (defun build-name-mappings ()
   "Initializes and fills the hash tables which map code points to
@@ -324,11 +354,11 @@ source code files for CL-UNICODE."
   (clrhash *case-mappings*)
   (loop for char-info across *char-database*
         for mappings = (and char-info
-                            (list (uppercase-mapping* char-info)
-                                  (lowercase-mapping* char-info)
+                            (list (lowercase-mapping* char-info)
+                                  (uppercase-mapping* char-info)
                                   (titlecase-mapping* char-info)))
         when (and mappings (some #'identity mappings))
-        do (setf (gethash (code-point char-info) *case-mappings*) mappings)))
+          do (setf (gethash (code-point char-info) *case-mappings*) mappings)))
 
 (defun build-data-structures ()
   "One function to combine the complete process of parsing all Unicode

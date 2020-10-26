@@ -116,13 +116,42 @@ TREE.  TREE is a tree as created by BUILD-TREE."
 lowercase, 1 uppercase, and 2 titlecase.  Returns a character if
 WANT-CODE-POINT-P is NIL and a code point otherwise.")
   (:method ((char character) position want-code-point-p)
-   (mapping (char-code char) position want-code-point-p))
+    (mapping (char-code char) position want-code-point-p))
   (:method ((code-point integer) position want-code-point-p)
-   (let* ((mappings (gethash code-point *case-mappings*))
-          (code-point (or (nth position mappings) code-point)))
-     (if want-code-point-p
-       code-point
-       (and code-point (code-char code-point))))))
+    (let* ((mappings (gethash code-point *case-mappings*))
+           (code-point (or (nth position mappings) code-point)))
+      (if want-code-point-p
+          code-point
+          (and code-point (code-char code-point)))))
+  (:method ((code-points list) position want-code-point-p)
+    (if (= position 2)
+        (concatenate 'list (list (mapping (car code-points) position want-code-point-p))
+                     (mapping (rest code-points) 0 want-code-point-p))
+        (loop for c in code-points
+              collect (mapping c position want-code-point-p)))))
+
+(defun evaluate-casing-condition (context condition)
+  "Evaluates casing condition. Requires proper implementation. Currently handles unconditional cases."
+  (and (null context) (null condition)))
+
+(defgeneric special-mapping (c position context)
+  (:documentation "Returns the special case mapping for the character C
+\(a code point or a Lisp character) in position POSITION where 0 means
+lowercase, 1 uppercase, and 2 titlecase.  Returns a code point list.")
+  (:method ((char character) position context)
+    (special-mapping (char-code char) position context))
+  (:method ((code-point integer) position context)
+    (let ((mappings (find-if #'(lambda (x) (evaluate-casing-condition context (car x)))
+                             (gethash code-point *special-case-mappings*))))
+      (or (nth position (rest mappings))
+          (list (mapping code-point position t)))))
+  (:method ((code-points list) position context)
+    (if (= position 2)
+        (concatenate 'list
+                     (special-mapping (car code-points) position context)
+                     (special-mapping (rest code-points) 0 context))
+        (loop for c in code-points
+              append (special-mapping c position context)))))
 
 (defun cjk-unified-ideograph-p (code-point)
   "Returns a true value if CODE-POINT is the code point of a CJK
@@ -182,6 +211,21 @@ described in section 3.12 of the Unicode book."
             (gethash v-value *jamo-short-names*)
             (and (/= t-value +T-BASE+)
                  (gethash t-value *jamo-short-names*)))))
+
+(declaim (inline compute-hangul-decomposition))
+(defun compute-hangul-decomposition (code-point)
+  "Algorithmically derives the Hangul syllable canonical decomposition."
+  (declare #.*standard-optimize-settings*)
+  (declare (fixnum code-point))
+  (let* ((s-index (- code-point +S-BASE+))
+         (l-value (+ +L-BASE+ (floor s-index +N-COUNT+)))
+         (v-value (+ +V-BASE+ (floor (mod s-index +N-COUNT+) +T-COUNT+)))
+         (t-value (+ +T-BASE+ (mod s-index +T-COUNT+)))
+         (lv-value (+ +S-BASE+ (* +T-COUNT+ (floor s-index +T-COUNT+)))))
+    (declare (fixnum s-index t-value lv-value))
+    (if (/= t-value +T-BASE+)
+        (list lv-value t-value)
+        (list l-value v-value))))
 
 (defconstant +first-hangul-syllable+ #xac00
   "The code point of the first Hangul syllable the name of which can
