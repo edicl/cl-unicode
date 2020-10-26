@@ -72,6 +72,7 @@
            :unicode-name
            :unicode1-name
            :uppercase-mapping
+           :case-fold-mapping
            :idna-mapping
            :canonical-decomposition))
 

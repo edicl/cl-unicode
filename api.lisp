@@ -311,7 +311,7 @@ See also BINARY-PROPERTIES.")
   (:method ((code-point integer) (property-symbol symbol))
    (find property-symbol (binary-props code-point) :test #'eq)))
 
-(defun uppercase-mapping (c &key want-code-point-p)
+(defun uppercase-mapping (c &key want-code-point-p want-special-p context)
   "Returns the simple uppercase mapping of a character.  C can be the
 character's code point \(a positive integer) or a \(Lisp) character
 assuming its character code is also its Unicode code point.  Returns
@@ -358,6 +358,9 @@ CHAR-CODE-LIMIT is smaller than +CODE-POINT-LIMIT+."
   (if want-special-p
       (special-mapping c 2 context)
       (mapping c 2 want-code-point-p)))
+
+(defun case-fold-mapping (c &key want-code-point-p)
+  (case-folding c want-code-point-p))
 
 (defun general-categories ()
   "Returns a sorted list of all general categories known to

@@ -153,6 +153,27 @@ lowercase, 1 uppercase, and 2 titlecase.  Returns a code point list.")
         (loop for c in code-points
               append (special-mapping c position context)))))
 
+(defgeneric case-folding (c want-code-point-p)
+  (:documentation "Return case folding for a character or list of characters.")
+  (:method ((char character) want-code-point-p)
+    (let* ((code-point (char-code char))
+           (folding (case-folding code-point)))
+      (if want-code-point-p
+          folding
+          (mapcar #'code-char folding))))
+  (:method ((code-point integer) want-code-point-p)
+    (let ((rule (find-if #'(lambda (r)
+                             (let ((status (car r)))
+                               (or (eql status (property-symbol "C"))
+                                   (eql status (property-symbol "F")))))
+                         (case-folding-mapping code-point))))
+      (if rule
+          (copy-list (second rule))
+          (list code-point))))
+  (:method ((chars list) want-code-point-p)
+    (loop for c in chars
+          append (case-folding c want-code-point-p))))
+
 (defun cjk-unified-ideograph-p (code-point)
   "Returns a true value if CODE-POINT is the code point of a CJK
 unified ideograph for which we can algorithmically derive the name."

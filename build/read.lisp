@@ -275,6 +275,24 @@ information is used to get properties by any alias."
                          (parse-value title 'hex-list nil))))
         (pushnew rules (gethash code-point *special-case-mappings*))))))
 
+(defun read-case-folding-mapping ()
+  "Parses the file \"CaseFolding.txt\" and adds the information about the
+case folding rules to the corresponding entries in *CHAR-DATABASE*."
+  (with-unicode-codepoint-file ((code-point-range
+                                 (status symbol)
+                                 (mapped-to hex-list nil))
+                                "CaseFolding.txt")
+    (with-code-point-range (code-point code-point-range)
+      (let ((char-info (aref *char-database* code-point))
+            (mapping (list status mapped-to)))
+        (if char-info
+            (pushnew mapping (case-folding-mapping* char-info))
+            ;; this file actually contains some information for
+            ;; unassigned (but reserved) code points, like e.g. #xfff0
+            (setf char-info (make-instance 'char-info :code-point code-point
+                                                      :case-folding-mapping (list mapping))
+                  (aref *char-database* code-point) char-info))))))
+
 (defun default-bidi-class (char-info)
   "Returns the default Bidi class for the character described by the
 CHAR-INFO object CHAR-INFO.  The default is computed as explained in
@@ -326,6 +344,7 @@ source code files for CL-UNICODE."
   (read-property-aliases)
   (read-idna-mapping)
   (read-special-casing)
+  (read-case-folding-mapping)
   (set-default-bidi-classes)
   (add-hangul-decomposition))
 

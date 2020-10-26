@@ -88,15 +88,10 @@
                                 (let ((nfd (canonical-decomposition c)))
                                   (or (not (equal (lowercase-mapping nfd :want-special-p t) nfd))
                                       (not (equal (uppercase-mapping nfd :want-special-p t) nfd))
-                                      (not (equal (titlecase-mapping nfd :want-special-p t) nfd))))))))
-
-
-;; todo: Changes_When_Lowercased, Changes_When_Uppercased,
-;;        Changes_When_Titlecased, Changes_When_Casefolded
-                                        ;Changes_When_Lowercased := toLowercase(toNFD(X)) != toNFD(X)
-                                        ;Changes_When_Uppercased := toUppercase(toNFD(X)) != toNFD(X)
-                                        ;Changes_When_Titlecased := toTitlecase(toNFD(X)) != toNFD(X)
-                                        ;Changes_When_Casefolded := toCasefold(toNFD(X)) != toNFD(X)
+                                      (not (equal (titlecase-mapping nfd :want-special-p t) nfd))))))
+    ("ChangesWhenCasefolded" ,(lambda (c)
+                                (let ((nfd (canonical-decomposition c)))
+                                  (not (equal (case-fold-mapping nfd :want-code-point-p t) nfd)))))))
 
 (defun build-derived-test-function (property-designators)
   (labels ((build-test-function (designator)

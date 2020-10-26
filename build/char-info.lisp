@@ -134,6 +134,12 @@ the character \(as a code point) if explicitly specified.")
                       :type (or fixnum null)
                       :documentation "The simple titlecase mapping of
 the character \(as a code point) if explicitly specified.")
+   (case-folding-mapping :initarg :case-folding-mapping
+                         :initform nil
+                         :accessor case-folding-mapping*
+                         :type nil
+                         :documentation "The case folding mapping of
+the character \(as a list of \(status, code point)) if explicitly specified.")
    (idna-mapping :initarg :idna-mapping
                  :initform nil
                  :accessor idna-mapping*
