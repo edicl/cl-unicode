@@ -407,9 +407,8 @@ HAS-PROPERTY.  If ALL is true, known aliases \(like \"Letter\" for
 \"L\") are also included."
   (sort (cond (all (loop for key being the hash-keys of *property-map*
                          collect key))
-              (t (mapcar 'property-name
-                         (loop for key being the hash-keys of *property-tests*
-                               collect key))))
+              (t (loop for key being the hash-keys of *property-tests*
+                       collect (property-name key))))
         'string-lessp))
 
 (defgeneric property-test (property &key errorp)

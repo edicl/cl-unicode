@@ -144,8 +144,7 @@ the character \(as a list of \(status, code point)) if explicitly specified.")
                  :initform nil
                  :accessor idna-mapping*
                  :type list
-                 :documentation "IDNA Mapping table entry for the code point"
-                 )
+                 :documentation "IDNA Mapping table entry for the code point")
    (decomposition-mapping :initarg :decomposition-mapping
                           :initform nil
                           :accessor decomposition-mapping*

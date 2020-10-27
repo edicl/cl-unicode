@@ -162,7 +162,7 @@ code block to the corresponding entries in *CHAR-DATABASE*."
   "Parses the file \"Scripts.txt\" and adds the information about the
 script to the corresponding entries in *CHAR-DATABASE*."
   (with-unicode-codepoint-file ((code-point-range (word-break symbol)) "auxiliary/WordBreakProperty.txt")
-                                        ;(pushnew word-break *word-breaks* :test #'eq)
+    ;;(pushnew word-break *word-breaks* :test #'eq)
     (with-code-point-range (code-point code-point-range)
       (let ((char-info (aref *char-database* code-point)))
         (when char-info
