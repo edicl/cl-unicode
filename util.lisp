@@ -301,22 +301,12 @@ is a Lisp character."
     (loop with acc = nil and result = nil
           for c in code-points
           for ccc = (combining-class c)
-<<<<<<< HEAD
           do (cond ((= 0 ccc)
                     (when acc
                       (setf result (nconc (csort acc) result))
                       (setf acc nil))
                     (push c result))
                    (t (push (cons ccc c) acc)))
-=======
-          do (if (= 0 ccc)
-                 (progn
-                   (when acc
-                     (setf result (nconc (csort acc) result))
-                     (setf acc nil))
-                   (push c result))
-                 (push (cons ccc c) acc))
->>>>>>> Reference implementation for canonical sorting, composition and normalization forms NFD, NFC, NFKC, NFKD
           finally (return (nreverse (nconc (csort acc) result))))))
 
 (defun canonical-composition (code-points)
