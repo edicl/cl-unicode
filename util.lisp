@@ -301,13 +301,12 @@ is a Lisp character."
     (loop with acc = nil and result = nil
           for c in code-points
           for ccc = (combining-class c)
-          do (if (= 0 ccc)
-                 (progn
-                   (when acc
-                     (setf result (nconc (csort acc) result))
-                     (setf acc nil))
-                   (push c result))
-                 (push (cons ccc c) acc))
+          do (cond ((= 0 ccc)
+                    (when acc
+                      (setf result (nconc (csort acc) result))
+                      (setf acc nil))
+                    (push c result))
+                   (t (push (cons ccc c) acc)))
           finally (return (nreverse (nconc (csort acc) result))))))
 
 (defun canonical-composition (code-points)
@@ -318,16 +317,15 @@ is a Lisp character."
           for c in (rest code-points)
           for ccc = (combining-class c)
           for composite = (combine start c)
-          if (and (< last-class ccc) (integerp composite))
-            do (setf start composite)
-          else
-            do (if (= ccc 0)
-                   (progn
-                     (setf result (nconc acc (cons start result)))
-                     (setf start c
-                           last-class -1
-                           acc nil))
-                   (progn
-                     (setf last-class ccc)
-                     (push c acc)))
+          do (cond
+               ((and (< last-class ccc) (integerp composite))
+                (setf start composite))
+               ((= ccc 0)
+                (setf result (nconc acc (cons start result)))
+                (setf start c
+                      last-class -1
+                      acc nil))
+               (t
+                (setf last-class ccc)
+                (push c acc)))
           finally (return (nreverse (nconc acc (cons start result)))))))
