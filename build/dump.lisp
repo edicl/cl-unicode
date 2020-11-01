@@ -174,6 +174,7 @@ hash-tables.lisp using DUMP-HASH-TABLE."
     (dump-hash-table '*special-case-mappings* out)
     (dump-hash-table '*jamo-short-names* out)
     (dump-hash-table '*property-aliases* out)
+    (dump-hash-table '*composition-mappings* out)
     ;; finally add code which adds the computed Hangul syllable names
     ;; at load time
     (print '(add-hangul-names) out)))
@@ -233,6 +234,21 @@ stream, though, but handed over to REALLY-ADD-TEST."
                  (add-test (1+ (cdr code-point-range)) property nil))))
         (print last-test out)))))
 
+(defun dump-normalization-tests ()
+  "Parses the Unicode data file \"NormalizationTest.txt\" \(which
+is not used in read.lisp) and uses it to create a file
+\"normalization-forms\" which will be used by CL-UNICODE-TEST."
+  (with-output-to-source-file (out (make-pathname :name "normalization-forms"
+                                                  :type nil
+                                                  :directory '(:relative :up "test"))
+                               :no-header-p t)
+    (with-unicode-file ("NormalizationTest.txt" contents)
+      (unless (char= #\@ (char (car  contents) 0))
+        (destructuring-bind (source nfc nfd nfkc nfkd &rest extra) (mapcar #'(lambda (x) (parse-value x 'hex-list nil)) contents)
+          (let ((*print-radix* t)
+                (*print-base* 16))
+            (print (list source nfc nfd nfkc nfkd) out)))))))
+
 (defun dump-data-structures ()
   "Dumps all the information contained in *CHAR-DATABASE* and the
 related hash tables and lists to the corresponding Lisp and test
@@ -241,6 +257,7 @@ source files."
   (dump-hash-tables)
   (dump-lists)
   (dump-derived-tests)
+  (dump-normalization-tests)
   (setq *char-database* nil))
 
 (defun create-source-files ()

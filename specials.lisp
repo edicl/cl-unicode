@@ -60,6 +60,8 @@ corresponding character \(unless all of them are NIL).")
 (defvar *special-case-mappings* (make-hash-table)
   "A hash table which maps code points to a list of special case mapping rules.")
 
+(defvar *composition-mappings* (make-hash-table))
+
 (defvar *general-categories* nil
   "A list of all property symbols which denote general categories.")
 

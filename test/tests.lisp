@@ -70,7 +70,7 @@ value iff all tests succeeded.  Errors in BODY are caught and reported
                            (make-pathname :name "simple"
                                           :type nil :version nil
                                           :defaults *this-file*))
-                          verbose)
+                       verbose)
   "Loops through all the forms in the file FILE-NAME and executes each
 of them using EVAL.  Reads all forms with the alternative character
 syntax enabled.  It is assumed that each FORM specifies a test which
@@ -131,6 +131,39 @@ succeeded."
                       errors)))
             errors))))))
 
+(defun normalization-tests (&key (file-name
+                                  (make-pathname :name "normalization-forms"
+                                                 :type nil :version nil
+                                                 :defaults *this-file*))
+                              verbose)
+  "Loops through all the forms in the file FILE-NAME and executes each
+of them as a test for a property.  The forms must be lists \(C S B)
+where C is a code point \(an integer), S is a string denoting the
+property, and B is boolean denoting whether the character has the
+property or not.  Tests are performed using HAS-PROPERTY.  Prints each
+test to *STANDARD-OUTPUT* if VERBOSE is true and shows a simple
+progress indicator otherwise.  Returns a true value iff all tests
+succeeded."
+  (with-open-file (stream file-name)
+    (do-tests ((format nil "Normalization forms from file ~S" (file-namestring file-name))
+               (not verbose))
+      (let ((input-line (or (read stream nil) (done))))
+        (destructuring-bind (source nfc nfd nfkc nfkd)
+            input-line
+          (when verbose
+            (format t "~&~A: " source))
+          (remove-if #'null
+                     (mapcar #'(lambda (name expected result)
+                                 (unless (equal expected result)
+                                   (format nil "~A~A should be ~A, got ~A"
+                                           name source expected result)))
+                             '("NFC" "NFD" "NFKC" "NFKD")
+                             (list nfc nfd nfkc nfkd)
+                             (list (cl-unicode:normalization-form-c source)
+                                   (cl-unicode:normalization-form-d source)
+                                   (cl-unicode:normalization-form-k-c source)
+                                   (cl-unicode:normalization-form-k-d source)))))))))
+
 (defun run-all-tests (&key verbose)
   "Runs all tests for CL-UNICODE and returns a true value iff all
 tests succeeded.  VERBOSE is interpreted by the individual test suites
@@ -145,6 +178,7 @@ above."
                                                                 :type nil :version nil
                                                                 :defaults *this-file*)))
       (run-test-suite (property-tests :verbose verbose))
-      (run-test-suite (simple-tests :verbose verbose)))
+      (run-test-suite (simple-tests :verbose verbose))
+      (run-test-suite (normalization-tests :verbose verbose)))
     (format t "~2&~:[Some tests failed~;All tests passed~]." successp)
     successp))
