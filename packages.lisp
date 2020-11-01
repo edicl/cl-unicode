@@ -74,7 +74,11 @@
            :uppercase-mapping
            :case-fold-mapping
            :idna-mapping
-           :canonical-decomposition))
+           :canonical-decomposition
+           :normalization-form-c
+           :normalization-form-d
+           :normalization-form-k-c
+           :normalization-form-k-d))
 
 (defpackage :cl-unicode-names
   (:use))

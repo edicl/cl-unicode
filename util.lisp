@@ -294,3 +294,40 @@ is a Lisp character."
        (integer ,c)
        (character (char-code ,c)))))
 
+(defun canonical-sort (code-points)
+  "Unicode Canonical Sort algorithm"
+  (flet ((csort (acc)
+           (mapcar #'cdr(stable-sort acc #'> :key #'car))))
+    (loop with acc = nil and result = nil
+          for c in code-points
+          for ccc = (combining-class c)
+          do (if (= 0 ccc)
+                 (progn
+                   (when acc
+                     (setf result (nconc (csort acc) result))
+                     (setf acc nil))
+                   (push c result))
+                 (push (cons ccc c) acc))
+          finally (return (nreverse (nconc (csort acc) result))))))
+
+(defun canonical-composition (code-points)
+  "Unicode Canonical Composition algorithm. See: https://dev.w3.org/cvsweb/~checkout~/charlint/charlint.pl?rev=1.28;content-type=text%2Fx-perl"
+  (flet ((combine (first second)
+           (cdr (assoc second (gethash first *composition-mappings*)))))
+    (loop with last-class = -1 and start = (car code-points) and result = nil and acc = nil
+          for c in (rest code-points)
+          for ccc = (combining-class c)
+          for composite = (combine start c)
+          if (and (< last-class ccc) (integerp composite))
+            do (setf start composite)
+          else
+            do (if (= ccc 0)
+                   (progn
+                     (setf result (nconc acc (cons start result)))
+                     (setf start c
+                           last-class -1
+                           acc nil))
+                   (progn
+                     (setf last-class ccc)
+                     (push c acc)))
+          finally (return (nreverse (nconc acc (cons start result)))))))

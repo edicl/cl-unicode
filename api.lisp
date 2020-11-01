@@ -389,6 +389,63 @@ the possible return values of CODE-BLOCK."
           (loop for c in mapping
                 nconc (canonical-decomposition c))))))
 
+(defgeneric compatibility-decomposition (c)
+  (:documentation "Decomposes input according to Unicode Compatibility Decomposition rules.")
+  (:method ((char character))
+    (compatibility-decomposition (char-code char)))
+  (:method ((code-point integer))
+    (let ((mapping (decomposition-mapping code-point)))
+      (if (null mapping)
+          (list code-point)
+          (loop for c in (if (symbolp (car mapping))
+                             (rest mapping)
+                             mapping)
+                nconc (compatibility-decomposition c))))))
+
+(defgeneric normalization-form-d (s)
+  (:documentation "NFD decomposition - per character canonical decomposition followed by canonical sort. Returns list of code points.")
+  (:method ((char character))
+    (canonical-decomposition char))
+  (:method ((code-point integer))
+    (canonical-decomposition code-point))
+  (:method ((chars list))
+    (canonical-sort (loop for c in chars
+                          nconc (normalization-form-d c))))
+  (:method ((chars string))
+    (canonical-sort (loop for c across chars
+                          nconc (canonical-decomposition c)))))
+
+(defgeneric normalization-form-k-d (s)
+  (:documentation "NFKD decomposition - per character compatibility decomposition followed by canonical sort. Returns list of code points.")
+  (:method ((char character))
+    (compatibility-decomposition char))
+  (:method ((code-point integer))
+    (compatibility-decomposition code-point))
+  (:method ((chars list))
+    (canonical-sort (loop for c in chars
+                          nconc (normalization-form-k-d c))))
+  (:method ((chars string))
+    (canonical-sort (loop for c across chars
+                          nconc (compatibility-decomposition c)))))
+
+(defgeneric normalization-form-c (s)
+  (:documentation "NFC normalization - per character canonical decomposition followed by canonical sort and canonical composition. Returns list of code points.")
+  (:method ((char character))
+    (normalization-form-c (char-code char)))
+  (:method ((code-point integer))
+    (normalization-form-c (list code-point)))
+  (:method (chars)
+    (canonical-composition (normalization-form-d chars))))
+
+(defgeneric normalization-form-k-c (s)
+  (:documentation "NFKC normalization - per character compatibility decomposition followed by canonical sort and canonical composition. Returns list of code points.")
+  (:method ((char character))
+    (normalization-form-k-c (char-code char)))
+  (:method ((code-point integer))
+    (normalization-form-k-c (list code-point)))
+  (:method (chars)
+    (canonical-composition (normalization-form-k-d chars))))
+
 (defun binary-properties ()
   "Returns a sorted list of all binary properties known to CL-UNICODE.
 These are the allowed second arguments \(modulo canonicalization) to

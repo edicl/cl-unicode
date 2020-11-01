@@ -126,19 +126,19 @@
                         (loop for test-function in positive-test-functions
                                 thereis (funcall (the function test-function) c)))
                     (not (loop for test-function in negative-test-functions
-                                 thereis (funcall (the function test-function) c))))))                  
+                                 thereis (funcall (the function test-function) c))))))
             (t
              (lambda (c)
                (or (null positive-test-functions)
                    (loop for test-function in positive-test-functions
                            thereis (funcall (the function test-function) c)))))))))
-               
+
 (defun build-derived-test-functions ()
   (loop for (name . property-names) in *derived-map*
         for symbol = (register-property-symbol name) do
-        (assert (null (gethash symbol *property-tests*)) (name)
-          "There is already a property named ~S." name)
-        (setf (gethash symbol *property-tests*)
-              (build-derived-test-function property-names)
-              (gethash name *property-map*)
-              symbol)))
+          (assert (null (gethash symbol *property-tests*)) (name)
+                  "There is already a property named ~S." name)
+          (setf (gethash symbol *property-tests*)
+                (build-derived-test-function property-names)
+                (gethash name *property-map*)
+                symbol)))

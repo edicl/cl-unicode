@@ -379,6 +379,39 @@ source code files for CL-UNICODE."
         when (and mappings (some #'identity mappings))
           do (setf (gethash (code-point char-info) *case-mappings*) mappings)))
 
+(defun build-composition-mappings ()
+  "Computes composition mapping as an inverse of canonical decomposition"
+  (declare #.*standard-optimize-settings*)
+  (when *compile-verbose*
+    (format t "~&;;; Computing canonical composition mappings")
+    (force-output))
+  (clrhash *composition-mappings*)
+  ;; read exclusion list
+  (let ((exclusion-map (make-hash-table)))
+    (with-unicode-codepoint-file ((code-point-range)
+                                  "CompositionExclusions.txt")
+      (with-code-point-range (code-point code-point-range)
+        (setf (gethash code-point exclusion-map) t)))
+    (flet ((non-starter-p (char-info)
+             (let ((mapping (decomposition-mapping* char-info))
+                   (ccc (combining-class* char-info)))
+               (declare (fixnum ccc))
+               (or (/= 0 ccc) (and (integerp (car mapping))
+                                   (let ((first (aref *char-database* (car mapping))))
+                                     (or (null first)
+                                         (/= 0 (combining-class* first)))))))))
+      (loop for char-info across *char-database*
+            for mapping = (if (null char-info)
+                              nil
+                              (decomposition-mapping* char-info))
+            unless (or (null mapping)
+                       (symbolp (car mapping))
+                       (/= 2 (length mapping)) ; ignore singletons
+                       (non-starter-p char-info)
+                       (gethash (code-point char-info) exclusion-map))
+              do (pushnew (cons (nth 1 mapping) (code-point char-info))
+                          (gethash (car mapping) *composition-mappings*))))))
+
 (defun build-data-structures ()
   "One function to combine the complete process of parsing all Unicode
 data files and building the corresponding Lisp datastructures in
@@ -388,4 +421,5 @@ memory."
     (format t "~&;;; Building hash tables")
     (force-output))
   (build-name-mappings)
-  (build-case-mapping))
+  (build-case-mapping)
+  (build-composition-mappings))
