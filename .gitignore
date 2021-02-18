@@ -2,3 +2,4 @@ hash-tables.lisp
 lists.lisp
 methods.lisp
 test/derived-properties
+test/normalization-forms
