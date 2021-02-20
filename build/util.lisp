@@ -29,8 +29,8 @@
 
 (in-package :cl-unicode)
 
-(defvar *this-file* (load-time-value
-                     (or #.*compile-file-pathname* *load-pathname*))
+(defparameter *this-file* (load-time-value
+                           (or #.*compile-file-pathname* *load-pathname*))
   "The location of this source file.  Needed to find the data files.")
 
 (defvar *char-database* nil
