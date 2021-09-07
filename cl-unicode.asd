@@ -1,4 +1,4 @@
-;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: CL-USER; Base: 10 -*-
+;;; -*- Mode: LISP; Syntax: ANSI-COMMON-LISP; Package: ASDF; Base: 10 -*-
 ;;; $Header: /usr/local/cvsrep/cl-unicode/cl-unicode.asd,v 1.23 2012-05-04 21:17:44 edi Exp $
 
 ;;; Copyright (c) 2008-2012, Dr. Edmund Weitz.  All rights reserved.
