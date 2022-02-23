@@ -31,4 +31,4 @@
 
 (defpackage :cl-unicode-test
   (:use :cl :cl-unicode)
-  (:export :run-all-tests))
+  (:export #:run-all-tests))
