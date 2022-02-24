@@ -31,9 +31,9 @@
 
 (defpackage :cl-unicode
   (:use :cl)
-  (:import-from :cl-ppcre
-                :*standard-optimize-settings*
-                :with-rebinding)
+  (:import-from #:cl-ppcre
+                #:*standard-optimize-settings*
+                #:with-rebinding)
   (:export #:+code-point-limit+
            #:*scripts-to-try*
            #:*try-abbreviations-p*
