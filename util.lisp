@@ -157,7 +157,7 @@ lowercase, 1 uppercase, and 2 titlecase.  Returns a code point list.")
   (:documentation "Return case folding for a character or list of characters.")
   (:method ((char character) want-code-point-p)
     (let* ((code-point (char-code char))
-           (folding (case-folding code-point)))
+           (folding (case-folding code-point want-code-point-p)))
       (if want-code-point-p
           folding
           (mapcar #'code-char folding))))
