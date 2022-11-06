@@ -137,7 +137,7 @@ the character \(as a code point) if explicitly specified.")
    (case-folding-mapping :initarg :case-folding-mapping
                          :initform nil
                          :accessor case-folding-mapping*
-                         :type nil
+                         :type list
                          :documentation "The case folding mapping of
 the character \(as a list of \(status, code point)) if explicitly specified.")
    (idna-mapping :initarg :idna-mapping
