@@ -201,6 +201,17 @@ script to the corresponding entries in *CHAR-DATABASE*."
         when char-info
           do (setf (decomposition-mapping* char-info) mapping)))
 
+(defun add-binary-property (code-point-range property)
+  (pushnew property *binary-properties* :test #'eq)
+  (with-code-point-range (code-point code-point-range)
+    (let ((char-info (aref *char-database* code-point)))
+      (unless char-info
+        ;; this file actually contains some information for
+        ;; unassigned (but reserved) code points, like e.g. #xfff0
+        (setf char-info (make-instance 'char-info :code-point code-point)
+              (aref *char-database* code-point) char-info))
+      (push property (binary-props* char-info)))))
+
 (defun read-binary-properties ()
   "Parses the file \"PropList.txt\" and adds information about binary
 properties to the corresponding entries in *CHAR-DATABASE*."
@@ -211,15 +222,7 @@ properties to the corresponding entries in *CHAR-DATABASE*."
     ;; point not being mentioned in UnicodeData.txt - see also the
     ;; initform for GENERAL-CATEGORY in the definition of CHAR-INFO
     (unless (eq property '#.(property-symbol "NoncharacterCodePoint"))
-      (pushnew property *binary-properties* :test #'eq)
-      (with-code-point-range (code-point code-point-range)
-        (let ((char-info (aref *char-database* code-point)))
-          (unless char-info
-            ;; this file actually contains some information for
-            ;; unassigned (but reserved) code points, like e.g. #xfff0
-            (setf char-info (make-instance 'char-info :code-point code-point)
-                  (aref *char-database* code-point) char-info))
-          (push property (binary-props* char-info)))))))
+      (add-binary-property code-point-range property))))
 
 (defun read-derived-age ()
   "Parses the file \"DerivedAge.txt\" and adds information about the
@@ -238,6 +241,37 @@ mirroring glyphs to the corresponding entries in *CHAR-DATABASE*."
       (let ((char-info (aref *char-database* code-point)))
         (when char-info
           (setf (bidi-mirroring-glyph* char-info) mirroring-glyph))))))
+
+(defun read-normalization-props ()
+  "Parses the file \"DerivedNormalizationProps.txt\" and adds Quick_Check binary properties 
+   to the corresponding entries in *CHAR-DATABASE*."
+  (with-unicode-file ("DerivedNormalizationProps.txt" contents)
+    (destructuring-bind (code-range name &rest other) contents
+      (let ((property (parse-value name 'symbol nil))
+            (range (parse-code-point code-range)))
+        (case property 
+          ((#.(property-symbol "FullCompositionExclusion") 
+            #.(property-symbol "ChangesWhenNFKCCasefolded"))
+           (add-binary-property range property))
+          (#.(property-symbol "NFDQC")
+             (with-code-point-range (code-point range)
+               (pushnew (property-symbol (first other)) (gethash code-point *nfd-quick-check-mappings*))))
+          (#.(property-symbol "NFKDQC")
+             (with-code-point-range (code-point range)
+               (pushnew (property-symbol (first other)) (gethash code-point *nfKd-quick-check-mappings*))))
+          (#.(property-symbol "NFCQC")
+             (with-code-point-range (code-point range)
+               (pushnew (property-symbol (first other)) (gethash code-point *nfd-quick-check-mappings*))))
+          (#.(property-symbol "NFKCQC")
+             (with-code-point-range (code-point range)
+               (pushnew (property-symbol (first other)) (gethash code-point *nfd-quick-check-mappings*))))
+          (#.(property-symbol "NFKCCF")
+             (with-code-point-range (code-point range)
+               (pushnew (parse-value (first other) 'hex-list nil) (gethash code-point *nfkc-casefold-mappings*))))
+          (otherwise 
+           (format t "~A ~A ~A ~%" code-range property other)))))))
+                      
+            
 
 (defun read-jamo ()
   "Parses the file \"Jamo.txt\" and stores information about Jamo
@@ -346,7 +380,8 @@ source code files for CL-UNICODE."
   (read-special-casing)
   (read-case-folding-mapping)
   (set-default-bidi-classes)
-  (add-hangul-decomposition))
+  (add-hangul-decomposition)
+  (read-normalization-props))
 
 (defun build-name-mappings ()
   "Initializes and fills the hash tables which map code points to

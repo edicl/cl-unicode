@@ -68,6 +68,21 @@ corresponding character \(unless all of them are NIL).")
 (defvar *compatibility-formatting-tags* nil
   "A list of Character Decomposition compatibility formatting tags.")
 
+(defvar *nfc-quick-check-mappings* (make-hash-table)
+  "A hash table that maps code points to NFC_Quick_Check properties.")
+
+(defvar *nfkc-quick-check-mappings* (make-hash-table)
+  "A hash table that maps code points to NFKC_Quick_Check properties.")
+
+(defvar *nfd-quick-check-mappings* (make-hash-table)
+  "A hash table that maps code points to NFD_Quick_Check properties.")
+
+(defvar *nfkd-quick-check-mappings* (make-hash-table)
+  "A hash table that maps code points to NFKD_Quick_Check properties.")
+
+(defvar *nfkc-casefold-mappings* (make-hash-table)
+  "A hash table that maps code points to NFKC_Casfold mapping rules.")
+
 (defvar *scripts* nil
   "A list of all property symbols which denote scripts.")
 

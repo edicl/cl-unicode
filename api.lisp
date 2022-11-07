@@ -446,6 +446,24 @@ the possible return values of CODE-BLOCK."
   (:method (chars)
     (canonical-composition (normalization-form-k-d chars))))
 
+(defgeneric identifier-case-fold (c)
+  (:documentation "Return case folding for a character or list of characters that represent an identifier (NFKC_Casefold).")
+  (:method ((char character))
+    (identifier-case-fold (char-code char)))
+  (:method ((code-point integer))
+    (let ((rule (gethash code-point *nfkc-casefold-mappings*)))
+      (if rule (copy-list rule) (list code-point))))
+  (:method ((chars list))
+    (normalization-form-c
+     (loop for c in chars 
+           append (identifier-case-fold c)))))
+
+(defun identifier-case-fold-mapping (c &key want-code-point-p)
+  (let ((mapped (identifier-case-fold c)))
+    (if want-code-point-p
+        (mapcar #'code-char mapped)
+        mapped)))
+
 (defun binary-properties ()
   "Returns a sorted list of all binary properties known to CL-UNICODE.
 These are the allowed second arguments \(modulo canonicalization) to
