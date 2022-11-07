@@ -452,11 +452,11 @@ the possible return values of CODE-BLOCK."
     (identifier-case-fold (char-code char)))
   (:method ((code-point integer))
     (let ((rule (gethash code-point *nfkc-casefold-mappings*)))
-      (if rule (copy-list rule) (list code-point))))
+      (if rule (copy-list (first rule)) (list code-point))))
   (:method ((chars list))
     (normalization-form-c
      (loop for c in chars 
-           append (identifier-case-fold c)))))
+           nconc (identifier-case-fold c)))))
 
 (defun identifier-case-fold-mapping (c &key want-code-point-p)
   (let ((mapped (identifier-case-fold c)))

@@ -245,6 +245,10 @@ mirroring glyphs to the corresponding entries in *CHAR-DATABASE*."
 (defun read-normalization-props ()
   "Parses the file \"DerivedNormalizationProps.txt\" and adds Quick_Check binary properties 
    to the corresponding entries in *CHAR-DATABASE*."
+  (dolist 
+      (hash (list *nfd-quick-check-mappings* *nfkd-quick-check-mappings* *nfd-quick-check-mappings* 
+              *nfd-quick-check-mappings* *nfkc-casefold-mappings*))
+            (clrhash hash))
   (with-unicode-file ("DerivedNormalizationProps.txt" contents)
     (destructuring-bind (code-range name &rest other) contents
       (let ((property (parse-value name 'symbol nil))
@@ -258,7 +262,7 @@ mirroring glyphs to the corresponding entries in *CHAR-DATABASE*."
                (pushnew (property-symbol (first other)) (gethash code-point *nfd-quick-check-mappings*))))
           (#.(property-symbol "NFKDQC")
              (with-code-point-range (code-point range)
-               (pushnew (property-symbol (first other)) (gethash code-point *nfKd-quick-check-mappings*))))
+               (pushnew (property-symbol (first other)) (gethash code-point *nfkd-quick-check-mappings*))))
           (#.(property-symbol "NFCQC")
              (with-code-point-range (code-point range)
                (pushnew (property-symbol (first other)) (gethash code-point *nfd-quick-check-mappings*))))
@@ -267,9 +271,7 @@ mirroring glyphs to the corresponding entries in *CHAR-DATABASE*."
                (pushnew (property-symbol (first other)) (gethash code-point *nfd-quick-check-mappings*))))
           (#.(property-symbol "NFKCCF")
              (with-code-point-range (code-point range)
-               (pushnew (parse-value (first other) 'hex-list nil) (gethash code-point *nfkc-casefold-mappings*))))
-          (otherwise 
-           (format t "~A ~A ~A ~%" code-range property other)))))))
+               (pushnew (parse-value (first other) 'hex-list nil) (gethash code-point *nfkc-casefold-mappings*)))))))))
                       
             
 
