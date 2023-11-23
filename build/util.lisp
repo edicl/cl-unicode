@@ -49,7 +49,7 @@ initialized with NILs."
 certain values which might otherwise not be seen when the Unicode
 files are parsed."
   (clrhash *canonical-names*)
-  (dolist (name '("Cn" "AL" "R" "L" "Decimal" "Digit" "Numeric" "BidiMirrored" "NoncharacterCodePoint"))
+  (dolist (name '("Cn" "AL" "R" "L" "Decimal" "Digit" "Numeric" "BidiMirrored" "NoncharacterCodePoint" "M"))
     (register-property-symbol name)))
 
 (defun extract-variables (bindings)

@@ -175,6 +175,11 @@ hash-tables.lisp using DUMP-HASH-TABLE."
     (dump-hash-table '*jamo-short-names* out)
     (dump-hash-table '*property-aliases* out)
     (dump-hash-table '*composition-mappings* out)
+    (dump-hash-table '*nfc-quick-check-mappings* out)
+    (dump-hash-table '*nfkc-quick-check-mappings* out)
+    (dump-hash-table '*nfkc-casefold-mappings* out)
+    (dump-hash-table '*nfd-quick-check-mappings* out)
+    (dump-hash-table '*nfkd-quick-check-mappings* out)
     ;; finally add code which adds the computed Hangul syllable names
     ;; at load time
     (print '(add-hangul-names) out)))

@@ -78,7 +78,9 @@
            :normalization-form-c
            :normalization-form-d
            :normalization-form-k-c
-           :normalization-form-k-d))
+           :normalization-form-k-d
+           :identifier-case-fold
+           :identifier-case-fold-mapping))
 
 (defpackage :cl-unicode-names
   (:use))
